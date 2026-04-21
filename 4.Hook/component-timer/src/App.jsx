@@ -1,22 +1,11 @@
-import {useEffect, useState} from 'react'
+import Timer from "./components/Timer.jsx";
 
 function App() {
-    const [timer, setTimer] = useState(10);
-
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTimer(prevState => prevState > 0 ? prevState - 1 : 0);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
-
     return (
         <div>
-            Count down: {timer}
+            <Timer />
         </div>
     );
 }
 
-export default App
+export default App;
