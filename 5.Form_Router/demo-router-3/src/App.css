@@ -1,0 +1,38 @@
+.app-container {
+  max-width: 480px;
+  margin: 50px auto;
+  padding: 25px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+h2 {
+  color: #34495e;
+  margin-bottom: 1rem;
+}
+
+select {
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 1.1rem;
+  border: 2px solid #2980b9;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: white;
+  transition: border-color 0.3s ease;
+}
+
+select:hover, select:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.product-info {
+  margin-top: 30px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
