@@ -1,0 +1,111 @@
+/* Reset và font */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background-color: #f4f7fb;
+}
+
+/* Căn giữa màn hình */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Container form */
+div[style] {
+  background-color: #ffffff;
+  padding: 3rem 2.5rem;
+  width: 600px;
+  max-width: 90vw;
+  border-radius: 10px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Tiêu đề */
+h1 {
+  text-align: center;
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Label */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Input */
+input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  font-size: 1rem;
+  border: 1.8px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+  font-family: inherit;
+}
+
+input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+/* Group mỗi trường */
+.custom-input {
+  margin-bottom: 1.8rem;
+}
+
+/* Nếu có lỗi thì đổi style */
+.custom-input-error label {
+  color: #e74c3c;
+}
+
+.custom-input-error input {
+  border-color: #e74c3c;
+  box-shadow: 0 0 6px rgba(231, 76, 60, 0.5);
+}
+
+/* Text lỗi */
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+/* Nút submit */
+button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #4a90e2;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 6px 12px rgba(74, 144, 226, 0.3);
+}
+
+button:hover {
+  background-color: #357ABD;
+}
+
+button:active {
+  background-color: #2a5f9e;
+  transform: translateY(1px);
+  box-shadow: none;
+}
