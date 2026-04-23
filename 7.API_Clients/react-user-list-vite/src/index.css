@@ -1,0 +1,31 @@
+/* ✅ Reset CSS: Xóa margin, padding mặc định và thiết lập box-sizing để dễ tính toán kích thước
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ✅ Cấu hình gốc: Thiết lập font chữ, line-height và tối ưu hiển thị chữ */
+:root {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ✅ Thiết lập cho body: Chiều cao toàn màn hình, nền gradient đẹp */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ✅ Thiết lập cho #root (thường dùng trong React): Chiếm toàn bộ chiều ngang và chiều cao màn hình */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
