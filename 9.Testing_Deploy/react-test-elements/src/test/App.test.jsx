@@ -6,6 +6,7 @@ describe('App Component', () => {
     it('should render "Hello world" inside .app-pages', () => {
         render(<App />);
         const divElement = screen.getByText('Hello world');
+
         expect(divElement).toBeInTheDocument();
         expect(divElement).toHaveClass('app-pages');
     });
