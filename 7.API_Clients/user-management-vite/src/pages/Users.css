@@ -1,0 +1,117 @@
+/* Users.css */
+
+.users-container {
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.users-card {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+}
+
+.users-title {
+    color: #333;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.users-list {
+    margin-bottom: 20px;
+}
+
+.users-item {
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.users-item:hover {
+    background-color: #e9ecef;
+}
+
+.users-item-info {
+    flex: 1;
+}
+
+.users-item-name {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.users-item-birthday {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.users-item-action {
+    color: #007bff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.users-empty {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.users-create-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.2s ease;
+}
+
+.users-create-btn:hover {
+    background-color: #218838;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .users-card {
+        padding: 20px;
+        margin: 20px 10px;
+    }
+
+    .users-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .users-item-action {
+        align-self: flex-end;
+    }
+
+    .users-create-btn {
+        width: 100%;
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Tommy",
+      "birthday": "1990-01-01"
+    },
+    {
+      "id": "2",
+      "name": "Jennie",
+      "birthday": "1995-03-12"
+    },
+    {
+      "id": "3",
+      "name": "Cấn Tuấn Anh",
+      "birthday": "2025-07-07"
+    }
+  ]
+}
