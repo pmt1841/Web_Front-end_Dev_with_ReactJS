@@ -1,0 +1,7 @@
+{
+  "users": [
+    {"id": 1, "name": "Tuan Anh"},
+    {"id": 2, "name": "Minh An"},
+    {"id": 3, "name": "Phong Linh"}
+  ]
+}
