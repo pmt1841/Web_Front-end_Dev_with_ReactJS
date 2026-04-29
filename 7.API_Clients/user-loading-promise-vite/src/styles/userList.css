@@ -1,0 +1,85 @@
+/* User List Component Styles */
+.main-container {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.content-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 28px;
+    color: #343a40;
+    margin-bottom: 30px;
+    margin-top: 0;
+}
+
+.users-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0;
+}
+
+.users-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-item {
+    background-color: white;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 16px;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.user-item:hover {
+    background-color: #e3f2fd;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-item:last-child {
+    margin-bottom: 0;
+}
+
+.user-icon {
+    margin-right: 12px;
+    font-size: 20px;
+}
+
+.user-name {
+    font-weight: 500;
+}
