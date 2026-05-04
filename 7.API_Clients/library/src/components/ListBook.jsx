@@ -16,7 +16,7 @@ function ListBook() {
     }, []);
 
     const handleDelete = (id) => {
-        const isConfirm = window.confirm("Bạn có chắc chắn muốn xóa cuốn sách này không?");
+        const isConfirm = window.confirm("Are you sure you want to delete this book?");
         if (!isConfirm) return;
 
         axios.delete(`https://my-json-server.typicode.com/codegym-vn/mock-api-books/books/${id}`)
