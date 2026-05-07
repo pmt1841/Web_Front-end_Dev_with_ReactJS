@@ -21,6 +21,7 @@ public class Transaction {
     private Long id;
 
     @NotBlank(message = "Tiêu đề không được để trống")
+    @Size(max = 50, message = "Tiêu đề không được quá 50 ký tự")
     private String title;
 
     @NotNull(message = "Số tiền không được để trống")
@@ -29,6 +30,7 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "category_id")
     @NotNull(message = "Danh mục không được để trống")
+    @Size(max = 50, message = "Tên danh mục không được quá 50 ký tự")
     private Category category;
 
     @NotNull(message = "Ngày tháng không được để trống")

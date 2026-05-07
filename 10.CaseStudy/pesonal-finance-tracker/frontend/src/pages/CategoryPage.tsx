@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import {
     Typography, Container, Box, Button, Tabs, Tab,
     Card, CardContent, CardActions, IconButton, Divider, Stack,
@@ -11,7 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import * as Icons from '@mui/icons-material';
 
 import api from "../services/api";
-import type { Category } from "../types/interface";
+import type {Category} from "../types/interface";
 import * as React from "react";
 
 // 1. Danh sách Icon và Màu sắc cho Modal
@@ -27,9 +27,9 @@ const AVAILABLE_COLORS = [
 ];
 
 // Helper hiển thị Icon động
-const DynamicIcon = ({ name, color }: { name: string, color?: string }) => {
+const DynamicIcon = ({name, color}: { name: string, color?: string }) => {
     const IconComponent = (Icons[name as keyof typeof Icons] as React.ElementType) || Icons.Category;
-    return <IconComponent sx={{ color: color }} />;
+    return <IconComponent sx={{color: color}}/>;
 };
 
 const CategoryPage = () => {
@@ -92,7 +92,7 @@ const CategoryPage = () => {
             return;
         }
 
-        const payload = { name, transactionType: type, icon: selectedIcon, color: selectedColor };
+        const payload = {name, transactionType: type, icon: selectedIcon, color: selectedColor};
         try {
             if (editingCategory) {
                 await api.put(`/categories/${editingCategory.id}`, payload);
@@ -132,59 +132,60 @@ const CategoryPage = () => {
     return (
         <Container maxWidth="lg">
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4, mb: 3 }}>
-                <Typography variant="h4" sx={{ fontWeight: "bold" }}>Quản lý Danh Mục</Typography>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddClick}
-                        sx={{ backgroundColor: "#2e7d32", "&:hover": { backgroundColor: "#1b5e20" } }}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4, mb: 3}}>
+                <Typography variant="h4" sx={{fontWeight: "bold"}}>Quản lý Danh Mục</Typography>
+                <Button variant="contained" startIcon={<AddIcon/>} onClick={handleAddClick}
+                        sx={{backgroundColor: "#2e7d32", "&:hover": {backgroundColor: "#1b5e20"}}}>
                     Thêm Danh Mục
                 </Button>
             </Box>
 
             {/* Tabs */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Box sx={{borderBottom: 1, borderColor: 'divider', mb: 3}}>
                 <Tabs value={tabIndex} onChange={(_, val) => setTabIndex(val)}
                       sx={{
-                          '& .MuiTab-root': { fontWeight: 'bold' },
-                          '& .Mui-selected': { color: tabIndex === 0 ? '#d32f2f !important' : '#2e7d32 !important' },
-                          '& .MuiTabs-indicator': { backgroundColor: tabIndex === 0 ? '#d32f2f' : '#2e7d32' }
+                          '& .MuiTab-root': {fontWeight: 'bold'},
+                          '& .Mui-selected': {color: tabIndex === 0 ? '#d32f2f !important' : '#2e7d32 !important'},
+                          '& .MuiTabs-indicator': {backgroundColor: tabIndex === 0 ? '#d32f2f' : '#2e7d32'}
                       }}>
-                    <Tab label="Khoản Chi" />
-                    <Tab label="Khoản Thu" />
+                    <Tab label="Khoản Chi"/>
+                    <Tab label="Khoản Thu"/>
                 </Tabs>
             </Box>
 
             {/* Danh sách Thẻ */}
             {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress /></Box>
+                <Box sx={{display: 'flex', justifyContent: 'center', py: 5}}><CircularProgress/></Box>
             ) : (
                 <Grid container spacing={3}>
                     {filteredCategories.map((category) => {
                         const displayColor = category.color || (category.transactionType === "EXPENSE" ? "#f44336" : "#4caf50");
                         return (
-                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={category.id}>
+                            <Grid size={{xs: 12, sm: 6, md: 4}} key={category.id}>
                                 <Card sx={{
                                     borderRadius: 3, boxShadow: 1, borderTop: `4px solid ${displayColor}`,
-                                    transition: "0.2s", "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
+                                    transition: "0.2s", "&:hover": {transform: "translateY(-4px)", boxShadow: 4},
                                     height: '100%', display: 'flex', flexDirection: 'column'
                                 }}>
-                                    <CardContent sx={{ flexGrow: 1 }}>
-                                        <Stack direction="row" spacing={2} sx={{ mb: 1.5, alignItems: "center" }}>
+                                    <CardContent sx={{flexGrow: 1}}>
+                                        <Stack direction="row" spacing={2} sx={{mb: 1.5, alignItems: "center"}}>
                                             <Box sx={{
                                                 p: 1.5, borderRadius: '50%', bgcolor: `${displayColor}1A`,
                                                 color: displayColor, display: 'flex'
                                             }}>
-                                                <DynamicIcon name={category.icon || "Category"} />
+                                                <DynamicIcon name={category.icon || "Category"}/>
                                             </Box>
-                                            <Typography variant="h6" sx={{ fontWeight: "bold" }}>{category.name}</Typography>
+                                            <Typography variant="h6"
+                                                        sx={{fontWeight: "bold"}}>{category.name}</Typography>
                                         </Stack>
                                     </CardContent>
-                                    <Divider />
-                                    <CardActions sx={{ justifyContent: "flex-end", p: 1 }}>
-                                        <IconButton sx={{ color: "#2e7d32" }} onClick={() => handleEditClick(category)}>
-                                            <EditIcon />
+                                    <Divider/>
+                                    <CardActions sx={{justifyContent: "flex-end", p: 1}}>
+                                        <IconButton sx={{color: "#2e7d32"}} onClick={() => handleEditClick(category)}>
+                                            <EditIcon/>
                                         </IconButton>
-                                        <IconButton sx={{ color: "#d32f2f" }} onClick={() => handleDeleteClick(category)}>
-                                            <DeleteIcon />
+                                        <IconButton sx={{color: "#d32f2f"}} onClick={() => handleDeleteClick(category)}>
+                                            <DeleteIcon/>
                                         </IconButton>
                                     </CardActions>
                                 </Card>
@@ -193,7 +194,7 @@ const CategoryPage = () => {
                     })}
                     {filteredCategories.length === 0 && (
                         <Grid size={12}>
-                            <Typography color="text.secondary" sx={{ py: 5, textAlign: "center" }}>
+                            <Typography color="text.secondary" sx={{py: 5, textAlign: "center"}}>
                                 Chưa có danh mục nào trong mục này.
                             </Typography>
                         </Grid>
@@ -203,45 +204,62 @@ const CategoryPage = () => {
 
             {/* 3. MODAL THÊM / SỬA (Màu Xanh #2e7d32) */}
             <Dialog open={openFormModal} onClose={() => setOpenFormModal(false)} maxWidth="sm" fullWidth>
-                <DialogTitle sx={{ backgroundColor: "#2e7d32", color: "white", fontWeight: "bold", textAlign: 'center' }}>
+                <DialogTitle sx={{backgroundColor: "#2e7d32", color: "white", fontWeight: "bold", textAlign: 'center'}}>
                     {editingCategory ? "Chỉnh Sửa Danh Mục" : "Thêm Danh Mục Mới"}
                 </DialogTitle>
                 <DialogContent dividers>
-                    <Stack spacing={3} sx={{ mt: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Stack spacing={3} sx={{mt: 1}}>
+                        <Box sx={{display: 'flex', justifyContent: 'center'}}>
                             <ToggleButtonGroup
                                 color={type === "INCOME" ? "success" : "error"}
                                 value={type} exclusive onChange={(_, val) => val && setType(val)}
                             >
-                                <ToggleButton value="EXPENSE" sx={{ px: 4, fontWeight: 'bold' }}>Khoản Chi</ToggleButton>
-                                <ToggleButton value="INCOME" sx={{ px: 4, fontWeight: 'bold' }}>Khoản Thu</ToggleButton>
+                                <ToggleButton value="EXPENSE" sx={{px: 4, fontWeight: 'bold'}}>Khoản Chi</ToggleButton>
+                                <ToggleButton value="INCOME" sx={{px: 4, fontWeight: 'bold'}}>Khoản Thu</ToggleButton>
                             </ToggleButtonGroup>
                         </Box>
-                        <TextField label="Tên danh mục" fullWidth value={name} onChange={(e) => setName(e.target.value)} required />
+                        <TextField
+                            label="Tên danh mục"
+                            fullWidth value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            slotProps={{
+                                htmlInput: {
+                                    maxLength: 30,
+                                },
+                            }}
+                            required/>
+
                         <Box>
-                            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>Chọn màu đại diện:</Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            <Typography variant="subtitle2" sx={{mb: 1, fontWeight: 'bold'}}>Chọn màu đại
+                                diện:</Typography>
+                            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
                                 {AVAILABLE_COLORS.map(color => (
                                     <Box key={color} onClick={() => setSelectedColor(color)}
                                          sx={{
-                                             width: 32, height: 32, borderRadius: '50%', bgcolor: color,
-                                             cursor: 'pointer', border: selectedColor === color ? '3px solid #333' : 'none'
+                                             width: 32,
+                                             height: 32,
+                                             borderRadius: '50%',
+                                             bgcolor: color,
+                                             cursor: 'pointer',
+                                             border: selectedColor === color ? '3px solid #333' : 'none'
                                          }}
                                     />
                                 ))}
                             </Box>
                         </Box>
                         <Box>
-                            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>Chọn biểu tượng:</Typography>
+                            <Typography variant="subtitle2" sx={{mb: 1, fontWeight: 'bold'}}>Chọn biểu
+                                tượng:</Typography>
                             <Grid container spacing={1}>
                                 {AVAILABLE_ICONS.map(iconName => (
-                                    <Grid size={{ xs: 3, sm: 2 }} key={iconName} sx={{ textAlign: 'center' }}>
+                                    <Grid size={{xs: 3, sm: 2}} key={iconName} sx={{textAlign: 'center'}}>
                                         <IconButton onClick={() => setSelectedIcon(iconName)}
                                                     sx={{
                                                         border: selectedIcon === iconName ? `2px solid ${selectedColor}` : '1px solid #ddd',
                                                         bgcolor: selectedIcon === iconName ? `${selectedColor}11` : 'transparent'
                                                     }}>
-                                            <DynamicIcon name={iconName} color={selectedIcon === iconName ? selectedColor : '#666'} />
+                                            <DynamicIcon name={iconName}
+                                                         color={selectedIcon === iconName ? selectedColor : '#666'}/>
                                         </IconButton>
                                     </Grid>
                                 ))}
@@ -249,9 +267,10 @@ const CategoryPage = () => {
                         </Box>
                     </Stack>
                 </DialogContent>
-                <DialogActions sx={{ p: 2 }}>
+                <DialogActions sx={{p: 2}}>
                     <Button onClick={() => setOpenFormModal(false)} color="inherit">Hủy</Button>
-                    <Button onClick={handleSave} variant="contained" sx={{ backgroundColor: "#2e7d32", "&:hover": { backgroundColor: "#1b5e20" } }}>
+                    <Button onClick={handleSave} variant="contained"
+                            sx={{backgroundColor: "#2e7d32", "&:hover": {backgroundColor: "#1b5e20"}}}>
                         Lưu Danh Mục
                     </Button>
                 </DialogActions>
@@ -259,24 +278,25 @@ const CategoryPage = () => {
 
             {/* 4. MODAL XÁC NHẬN XÓA (Màu Đỏ #d32f2f) */}
             <Dialog open={openDeleteModal} onClose={() => setOpenDeleteModal(false)} maxWidth="xs" fullWidth>
-                <DialogTitle sx={{ backgroundColor: "#d32f2f", color: "white", fontWeight: "bold", textAlign: "center" }}>
+                <DialogTitle sx={{backgroundColor: "#d32f2f", color: "white", fontWeight: "bold", textAlign: "center"}}>
                     Xác nhận xóa
                 </DialogTitle>
-                <DialogContent sx={{ pt: 3, pb: 1, textAlign: 'center' }}>
-                    <DialogContentText sx={{ fontSize: '1.1rem' }}>
+                <DialogContent sx={{pt: 3, pb: 1, textAlign: 'center'}}>
+                    <DialogContentText sx={{fontSize: '1.1rem'}}>
                         Bạn có chắc chắn muốn xóa danh mục <br/>
-                        <strong style={{ color: "#d32f2f" }}>{categoryToDelete?.name}</strong> không?
+                        <strong style={{color: "#d32f2f"}}>{categoryToDelete?.name}</strong> không?
                     </DialogContentText>
-                    <DialogContentText sx={{ mt: 1, fontSize: '0.9rem', color: "text.secondary" }}>
+                    <DialogContentText sx={{mt: 1, fontSize: '0.9rem', color: "text.secondary"}}>
                         Hành động này không thể hoàn tác.
                     </DialogContentText>
                 </DialogContent>
-                <DialogActions sx={{ p: 2, justifyContent: "center", gap: 1 }}>
-                    <Button onClick={() => setOpenDeleteModal(false)} color="inherit" variant="outlined" sx={{ width: 100 }}>
+                <DialogActions sx={{p: 2, justifyContent: "center", gap: 1}}>
+                    <Button onClick={() => setOpenDeleteModal(false)} color="inherit" variant="outlined"
+                            sx={{width: 100}}>
                         Hủy
                     </Button>
-                    <Button onClick={confirmDelete} variant="contained" startIcon={<DeleteIcon />}
-                            sx={{ width: 100, backgroundColor: "#d32f2f", "&:hover": { backgroundColor: "#b71c1c" } }}>
+                    <Button onClick={confirmDelete} variant="contained" startIcon={<DeleteIcon/>}
+                            sx={{width: 100, backgroundColor: "#d32f2f", "&:hover": {backgroundColor: "#b71c1c"}}}>
                         Xóa
                     </Button>
                 </DialogActions>

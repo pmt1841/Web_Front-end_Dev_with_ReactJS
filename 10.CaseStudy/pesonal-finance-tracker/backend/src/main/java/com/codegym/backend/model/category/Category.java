@@ -3,6 +3,7 @@ package com.codegym.backend.model.category;
 import com.codegym.backend.model.transaction.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class Category {
     private Integer id;
 
     @NotBlank(message = "Tên danh mục không được để trống")
+    @Size(max = 50, message = "Tên danh mục không được quá 50 ký tự")
     @Column(unique = true)
     private String name;
 

@@ -4,12 +4,20 @@ import {
     TableContainer, TableHead, TableRow, Paper, Chip,
     Button, Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, Autocomplete, ToggleButton, ToggleButtonGroup, Box, Stack,
-    FormControl, InputLabel, Select, MenuItem, TablePagination, Grid
+    FormControl, InputLabel, Select, MenuItem, TablePagination, Grid,
+    Popover, Divider, Slider
 } from "@mui/material";
+import {LocalizationProvider, DateCalendar} from '@mui/x-date-pickers';
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import dayjs from 'dayjs';
+
 import api from "../services/api";
 import type {Transaction, Category, PageResponse} from "../types/interface";
+import * as React from "react";
+import * as Icons from '@mui/icons-material';
 
 const TransactionPage = () => {
     // === 1. STATE QUẢN LÝ DANH SÁCH & BỘ LỌC ===
@@ -21,8 +29,12 @@ const TransactionPage = () => {
     const [filterCategoryId, setFilterCategoryId] = useState<number | "ALL">("ALL");
     const [filterType, setFilterType] = useState<"ALL" | "INCOME" | "EXPENSE">("ALL");
     const [filterSort, setFilterSort] = useState<"desc" | "asc">("desc");
+
+    // State cho ngày lọc
     const [filterStartDate, setFilterStartDate] = useState("");
     const [filterEndDate, setFilterEndDate] = useState("");
+    const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
+
     const [filterMinAmount, setFilterMinAmount] = useState("");
     const [filterMaxAmount, setFilterMaxAmount] = useState("");
 
@@ -45,9 +57,36 @@ const TransactionPage = () => {
     // State Modal tạo danh mục
     const [openCategoryModal, setOpenCategoryModal] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
+    const [categoryError, setCategoryError] = useState("");
 
     // State Modal Xác nhận Xóa
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+
+    // === XỬ LÝ DATE RANGE POPOVER ===
+    const handleDateClick = (event: React.MouseEvent<HTMLDivElement>) => setAnchorEl(event.currentTarget);
+    const handleDateClose = () => setAnchorEl(null);
+    const displayDateRange = filterStartDate || filterEndDate
+        ? `${filterStartDate ? dayjs(filterStartDate).format('DD/MM/YYYY') : '?'} - ${filterEndDate ? dayjs(filterEndDate).format('DD/MM/YYYY') : '?'}`
+        : "";
+
+    // 1. State cho Popover tiền
+    const [priceAnchorEl, setPriceAnchorEl] = useState<HTMLDivElement | null>(null);
+
+// 2. Định nghĩa giới hạn
+    const MIN_LIMIT = 0;
+    const MAX_LIMIT = 100000000; // 100 triệu
+
+// 3. Hàm xử lý Slider (MUI Slider yêu cầu mảng [min, max])
+    const handleSliderChange = (_event: Event, newValue: number | number[]) => {
+        const [min, max] = newValue as number[];
+        setFilterMinAmount(min.toString());
+        setFilterMaxAmount(max.toString());
+    };
+
+// 4. Text hiển thị trên nút/ô nhập
+    const displayPriceRange = (filterMinAmount || filterMaxAmount)
+        ? `${Number(filterMinAmount || 0).toLocaleString()} - ${Number(filterMaxAmount || MAX_LIMIT).toLocaleString()} VNĐ`
+        : "";
 
     // === 3. CÁC HÀM GỌI API ===
     const fetchTransactions = useCallback(async (
@@ -56,11 +95,11 @@ const TransactionPage = () => {
         type: string,
         currentPage: number,
         size: number,
-        sortDir: string, 
-        startDate: string, 
-        endDate: string, 
-        minAm: string, 
-        maxAm: string 
+        sortDir: string,
+        startDate: string,
+        endDate: string,
+        minAm: string,
+        maxAm: string
     ) => {
         try {
             const params: Record<string, string | number> = {
@@ -232,6 +271,11 @@ const TransactionPage = () => {
             const numericAmount = Math.abs(Number(amount));
             const finalAmount = transactionType === "EXPENSE" ? -numericAmount : numericAmount;
 
+            if (!selectedCategory) {
+                setErrors(prev => ({...prev, category: "Vui lòng chọn danh mục"}));
+                return;
+            }
+
             const transactionData = {
                 title: title,
                 amount: finalAmount,
@@ -301,7 +345,10 @@ const TransactionPage = () => {
     };
 
     const handleSaveQuickCategory = async () => {
-        if (!newCategoryName.trim()) return;
+        if (!newCategoryName || !newCategoryName.trim()) {
+            setCategoryError("Tên danh mục không được để trống");
+            return;
+        }
 
         try {
             const response = await api.post<Category>("/categories", {name: newCategoryName});
@@ -311,6 +358,7 @@ const TransactionPage = () => {
             setSelectedCategory(createdCategory);
             setOpenCategoryModal(false);
             setNewCategoryName("");
+            setCategoryError("");
 
         } catch (error) {
             console.error("Lỗi khi tạo danh mục nhanh:", error);
@@ -324,432 +372,547 @@ const TransactionPage = () => {
     };
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return "";
         const d = new Date(dateString);
-        return d.toLocaleDateString('vi-VN');
+        return d.toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
     };
 
     return (
-        <Container sx={{mt: 4, mb: 4}}>
-            {/* Tiêu đề & Nút Thêm */}
-            <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3}}>
-                <Typography variant="h4" sx={{fontWeight: "bold"}}>
-                    Quản lý Giao dịch
-                </Typography>
-                <Button variant="contained" color="success" startIcon={<AddIcon/>} onClick={handleOpenAdd}>
-                    Thêm giao dịch
-                </Button>
-            </Box>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Container sx={{mt: 4, mb: 4}}>
+                {/* Tiêu đề & Nút Thêm */}
+                <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3}}>
+                    <Typography variant="h4" sx={{fontWeight: "bold"}}>
+                        Quản lý Giao dịch
+                    </Typography>
+                    <Button variant="contained" color="success" startIcon={<AddIcon/>} onClick={handleOpenAdd}>
+                        Thêm giao dịch
+                    </Button>
+                </Box>
 
-            {/* THANH BỘ LỌC (FILTERS) */}
-            <Paper sx={{ p: 2, mb: 3, backgroundColor: "#fbfbfb" }} elevation={1}>
-                <Stack spacing={2.5}>
-                    {/* HÀNG TRÊN: Thanh tìm kiếm chiếm toàn bộ, Nút làm mới ở cuối */}
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <TextField
-                            label="Tìm theo tiêu đề hoặc ghi chú..."
-                            variant="outlined"
-                            size="small"
-                            sx={{ flexGrow: 1 }}
-                            value={filterKeyword}
-                            onChange={(e) => setFilterKeyword(e.target.value)}
-                        />
-                        <Button
-                            variant="outlined"
-                            color="inherit"
-                            startIcon={<RefreshIcon />}
-                            onClick={handleResetFilters}
-                            sx={{
-                                minWidth: 120,
-                                height: 40,
-                                whiteSpace: 'nowrap' // Đảm bảo chữ không bị xuống dòng
-                            }}
-                        >
-                            Làm mới
-                        </Button>
-                    </Box>
-
-                    {/* HÀNG DƯỚI: Sử dụng Grid để tự động căn lề chuẩn xác */}
-                    <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                            <FormControl size="small" fullWidth>
-                                <InputLabel>Danh mục</InputLabel>
-                                <Select
-                                    value={filterCategoryId}
-                                    label="Danh mục"
-                                    onChange={(e) => setFilterCategoryId(e.target.value as number | "ALL")}
-                                >
-                                    <MenuItem value="ALL"><em>Tất cả</em></MenuItem>
-                                    {categories.map((cat) => (
-                                        <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-
-                        <Grid size={{ xs: 6, sm: 3, md: 1.5 }}>
-                            <FormControl size="small" fullWidth>
-                                <InputLabel>Loại</InputLabel>
-                                <Select
-                                    value={filterType}
-                                    label="Loại"
-                                    onChange={(e) => setFilterType(e.target.value as "ALL" | "INCOME" | "EXPENSE")}
-                                >
-                                    <MenuItem value="ALL"><em>Tất cả</em></MenuItem>
-                                    <MenuItem value="INCOME">Khoản Thu</MenuItem>
-                                    <MenuItem value="EXPENSE">Khoản Chi</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-
-                        <Grid size={{ xs: 6, sm: 3, md: 1.5 }}>
-                            <FormControl size="small" fullWidth>
-                                <InputLabel>Sắp xếp</InputLabel>
-                                <Select
-                                    value={filterSort}
-                                    label="Sắp xếp"
-                                    onChange={(e) => setFilterSort(e.target.value as "asc" | "desc")}
-                                >
-                                    <MenuItem value="desc">Mới nhất</MenuItem>
-                                    <MenuItem value="asc">Cũ nhất</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-
-                        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                {/* THANH BỘ LỌC (FILTERS) */}
+                <Paper sx={{p: 2, mb: 3, backgroundColor: "#fbfbfb"}} elevation={1}>
+                    <Stack spacing={2.5}>
+                        {/* HÀNG TRÊN: Thanh tìm kiếm chiếm toàn bộ, Nút làm mới ở cuối */}
+                        <Box sx={{display: 'flex', gap: 2, alignItems: 'center'}}>
                             <TextField
-                                label="Từ ngày"
-                                type="date"
+                                label="Tìm theo tiêu đề hoặc ghi chú..."
+                                variant="outlined"
                                 size="small"
-                                fullWidth
-                                slotProps={{ inputLabel: { shrink: true } }}
-                                value={filterStartDate}
-                                onChange={(e) => setFilterStartDate(e.target.value)}
-                            />
-                        </Grid>
-
-                        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                            <TextField
-                                label="Đến ngày"
-                                type="date"
-                                size="small"
-                                fullWidth
-                                slotProps={{ inputLabel: { shrink: true } }}
-                                value={filterEndDate}
-                                onChange={(e) => setFilterEndDate(e.target.value)}
-                            />
-                        </Grid>
-
-                        <Grid size={{ xs: 6, sm: 6, md: 1.5 }}>
-                            <TextField
-                                label="Giá tối thiểu"
-                                type="number"
-                                size="small"
-                                fullWidth
-                                value={filterMinAmount}
-                                onChange={(e) => setFilterMinAmount(e.target.value)}
-                            />
-                        </Grid>
-
-                        <Grid size={{ xs: 6, sm: 6, md: 1.5 }}>
-                            <TextField
-                                label="Giá tối đa"
-                                type="number"
-                                size="small"
-                                fullWidth
-                                value={filterMaxAmount}
-                                onChange={(e) => setFilterMaxAmount(e.target.value)}
-                            />
-                        </Grid>
-                    </Grid>
-                </Stack>
-            </Paper>
-
-            {/* BẢNG DỮ LIỆU */}
-            <TableContainer component={Paper} elevation={3}>
-                <Table>
-                    <TableHead sx={{backgroundColor: "#f5f5f5"}}>
-                        <TableRow>
-                            <TableCell><b>STT</b></TableCell>
-                            <TableCell><b>Tiêu đề</b></TableCell>
-                            <TableCell><b>Danh mục</b></TableCell>
-                            <TableCell><b>Ngày</b></TableCell>
-                            <TableCell align="right"><b>Số tiền</b></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {transactions.map((tx, index) => (
-                            <TableRow
-                                key={tx.id}
-                                hover
-                                onClick={() => handleRowClick(tx)}
-                                sx={{cursor: "pointer"}}          con trỏ chuột bàn tay
-                            >
-                                <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                                <TableCell>
-                                    <Typography variant="body1">{tx.title}</Typography>
-                                    {tx.note &&
-                                        <Typography variant="caption" color="text.secondary">{tx.note}</Typography>}
-                                </TableCell>
-                                <TableCell>
-                                    <Chip
-                                        label={tx.category?.name || "N/A"}
-                                        size="small"
-                                        sx={{
-                                            backgroundColor: tx.category?.color ? `${tx.category.color}22` : "#eeeeee",
-                                            color: tx.category?.color || "#666",
-                                            fontWeight: "bold",
-                                            border: `1px solid ${tx.category?.color || "#ddd"}`
-                                        }}
-                                    />
-                                </TableCell>
-                                <TableCell>{formatDate(tx.date)}</TableCell>
-                                <TableCell align="right" sx={{
-                                    color: tx.amount > 0 ? "success.main" : "error.main",
-                                    fontWeight: "bold"
-                                }}>
-                                    {tx.amount > 0 ? "+" : ""}{formatCurrency(tx.amount)}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {transactions.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={5} align="center" sx={{py: 3}}>
-                                    Không tìm thấy giao dịch nào phù hợp!
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={totalElements}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={(_e, newPage) => setPage(newPage)}
-                    onRowsPerPageChange={(e) => {
-                        setRowsPerPage(parseInt(e.target.value, 10));
-                        setPage(0);
-                    }}
-                    labelRowsPerPage="Số dòng mỗi trang:"
-                />
-            </TableContainer>
-
-            {/* MODAL THÊM/SỬA GIAO DỊCH */}
-            <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-                <DialogTitle sx={{
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    backgroundColor: "#2e7d32",
-                    color: "white"
-                }}>
-                    {/* Đổi tiêu đề Modal dựa trên trạng thái editingId */}
-                    {editingId ? "Chỉnh sửa Giao Dịch" : "Thêm Giao Dịch Mới"}
-                </DialogTitle>
-                <DialogContent dividers>
-                    <Stack spacing={3} sx={{mt: 1}}>
-                        <Box sx={{display: "flex", justifyContent: "center"}}>
-                            <ToggleButtonGroup
-                                color={transactionType === "INCOME" ? "success" : "error"}
-                                value={transactionType}
-                                exclusive
-                                onChange={(_, newValue) => {
-                                    if (newValue) setTransactionType(newValue);
-                                }}
-                            >
-                                <ToggleButton value="EXPENSE" sx={{px: 4, fontWeight: "bold"}}>Khoản Chi</ToggleButton>
-                                <ToggleButton value="INCOME" sx={{px: 4, fontWeight: "bold"}}>Khoản Thu</ToggleButton>
-                            </ToggleButtonGroup>
-                        </Box>
-                        <TextField
-                            label="Tiêu đề giao dịch"
-                            fullWidth
-                            value={title}
-                            onChange={(e) => {
-                                setTitle(e.target.value);
-                                if (errors.title) setErrors(prev => ({ ...prev, title: "" }));
-                            }}
-                            error={!!errors.title}
-                            helperText={errors.title}
-                            required
-                        />
-                        <Stack direction="row" spacing={2}>
-                            <TextField
-                                label="Số tiền"
-                                type="number"
-                                fullWidth
-                                value={amount}
-                                onChange={(e) => {
-                                    setAmount(e.target.value);
-                                    if (errors.amount) setErrors(prev => ({ ...prev, amount: "" }));
-                                }}
-                                error={!!errors.amount}
-                                helperText={errors.amount}
-                                required
-                            />
-                            <TextField
-                                label="Ngày thực hiện"
-                                type="date"
-                                fullWidth
-                                slotProps={{inputLabel: {shrink: true}}}
-                                value={date}
-                                onChange={(e) => {
-                                    setDate(e.target.value);
-                                    if (errors.date) setErrors(prev => ({ ...prev, date: "" }));
-                                }}
-                                error={!!errors.date}
-                                helperText={errors.date}
-                                required
-                            />
-                        </Stack>
-                        <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                            <Autocomplete
                                 sx={{flexGrow: 1}}
-                                options={categories}
-                                getOptionLabel={(option) => option.name}
-                                value={selectedCategory}
-                                onChange={(_, newValue) => {
-                                    setSelectedCategory(newValue);
-                                    if (errors.category) setErrors(prev => ({ ...prev, category: "" }));
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Chọn danh mục"
-                                        required
-                                        error={!!errors.category}
-                                        helperText={errors.category}
-                                    />
-                                )}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                value={filterKeyword}
+                                onChange={(e) => setFilterKeyword(e.target.value)}
                             />
-                            <Button variant="outlined" color="primary" sx={{
-                                height: 56,
-                                minWidth: 56,
-                                color: "#2e7d32",
-                                borderColor: "#2e7d32",
-                                "&:hover": {
-                                    borderColor: "#1b5e20",
-                                    backgroundColor: "rgba(46, 125, 50, 0.04)"
-                                }
-                            }}
-                                    onClick={() => setOpenCategoryModal(true)}>
-                                <AddIcon/>
+                            <Button
+                                variant="outlined"
+                                color="inherit"
+                                startIcon={<RefreshIcon/>}
+                                onClick={handleResetFilters}
+                                sx={{
+                                    minWidth: 120,
+                                    height: 40,
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                Làm mới
                             </Button>
-                        </Stack>
-                        <TextField
-                            label="Ghi chú (Tùy chọn)"
-                            multiline
-                            rows={2}
-                            fullWidth
-                            value={note}
-                            onChange={(e) => {
-                                setNote(e.target.value);
-                                if (errors.note) setErrors(prev => ({ ...prev, note: "" }));
-                            }}
-                            error={!!errors.note}
-                            helperText={errors.note}
-                        />
+                        </Box>
+
+                        {/* HÀNG DƯỚI: Sử dụng Grid để tự động căn lề chuẩn xác */}
+                        <Grid container spacing={2}>
+                            <Grid size={{xs: 12, sm: 6, md: 2}}>
+                                <FormControl size="small" fullWidth>
+                                    <InputLabel>Danh mục</InputLabel>
+                                    <Select
+                                        value={filterCategoryId}
+                                        label="Danh mục"
+                                        onChange={(e) => setFilterCategoryId(e.target.value as number | "ALL")}
+                                    >
+                                        <MenuItem value="ALL"><em>Tất cả</em></MenuItem>
+                                        {categories.map((cat) => (
+                                            <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid size={{xs: 6, sm: 3, md: 1.5}}>
+                                <FormControl size="small" fullWidth>
+                                    <InputLabel>Loại</InputLabel>
+                                    <Select
+                                        value={filterType}
+                                        label="Loại"
+                                        onChange={(e) => setFilterType(e.target.value as "ALL" | "INCOME" | "EXPENSE")}
+                                    >
+                                        <MenuItem value="ALL"><em>Tất cả</em></MenuItem>
+                                        <MenuItem value="INCOME">Khoản Thu</MenuItem>
+                                        <MenuItem value="EXPENSE">Khoản Chi</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid size={{xs: 6, sm: 3, md: 1.5}}>
+                                <FormControl size="small" fullWidth>
+                                    <InputLabel>Sắp xếp</InputLabel>
+                                    <Select
+                                        value={filterSort}
+                                        label="Sắp xếp"
+                                        onChange={(e) => setFilterSort(e.target.value as "asc" | "desc")}
+                                    >
+                                        <MenuItem value="desc">Mới nhất</MenuItem>
+                                        <MenuItem value="asc">Cũ nhất</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid size={{xs: 12, sm: 12, md: 3.5}}>
+                                <TextField
+                                    label="Khoảng thời gian"
+                                    size="small" fullWidth
+                                    value={displayDateRange}
+                                    onClick={handleDateClick}
+                                    placeholder="Chọn ngày bắt đầu - kết thúc"
+                                    slotProps={{
+                                        input: {
+                                            readOnly: true,
+                                            startAdornment: <CalendarMonthIcon sx={{mr: 1, color: 'action.active'}}/>,
+                                            sx: {cursor: 'pointer'}
+                                        },
+                                        htmlInput: {sx: {cursor: 'pointer'}}
+                                    }}
+                                />
+                                <Popover
+                                    open={Boolean(anchorEl)}
+                                    anchorEl={anchorEl}
+                                    onClose={handleDateClose}
+                                    anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                                >
+                                    <Box sx={{p: 2}}>
+                                        <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}
+                                               divider={<Divider orientation="vertical" flexItem/>}>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ fontWeight: 'bold' }}>TỪ NGÀY</Typography>
+                                                <DateCalendar
+                                                    value={filterStartDate ? dayjs(filterStartDate) : null}
+                                                    onChange={(val) => setFilterStartDate(val?.format('YYYY-MM-DD') || "")}
+                                                />
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ fontWeight: 'bold' }}>ĐẾN NGÀY</Typography>
+                                                <DateCalendar
+                                                    value={filterEndDate ? dayjs(filterEndDate) : null}
+                                                    minDate={filterStartDate ? dayjs(filterStartDate) : undefined}
+                                                    onChange={(val) => setFilterEndDate(val?.format('YYYY-MM-DD') || "")}
+                                                />
+                                            </Box>
+                                        </Stack>
+                                        <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 1, gap: 1}}>
+                                            <Button size="small" color="error" onClick={() => {
+                                                setFilterStartDate("");
+                                                setFilterEndDate("");
+                                            }}>Xóa lọc</Button>
+                                            <Button size="small" variant="contained" color="success"
+                                                    onClick={handleDateClose}>Áp dụng</Button>
+                                        </Box>
+                                    </Box>
+                                </Popover>
+                            </Grid>
+
+                            {/* BỘ LỌC GIÁ GỘP */}
+                            <Grid size={{ xs: 12, sm: 12, md: 3 }}>
+                                <TextField
+                                    label="Khoảng giá (VNĐ)"
+                                    size="small" fullWidth
+                                    value={displayPriceRange}
+                                    onClick={(e) => setPriceAnchorEl(e.currentTarget)}
+                                    placeholder="Tất cả khoảng giá"
+                                    slotProps={{
+                                        input: {
+                                            readOnly: true,
+                                            startAdornment: <Icons.Paid sx={{ mr: 1, color: 'action.active' }} />,
+                                            sx: { cursor: 'pointer' }
+                                        },
+                                        htmlInput: { sx: { cursor: 'pointer' } }
+                                    }}
+                                />
+                                <Popover
+                                    open={Boolean(priceAnchorEl)}
+                                    anchorEl={priceAnchorEl}
+                                    onClose={() => setPriceAnchorEl(null)}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                    PaperProps={{ sx: { p: 3, width: 350 } }}
+                                >
+                                    <Typography variant="subtitle2" sx={{ mb: 3, fontWeight: 'bold' }}>
+                                        Chọn khoảng giá (VNĐ)
+                                    </Typography>
+
+                                    {/* Thanh kéo Slider 2 núm */}
+                                    <Box sx={{ px: 2, mb: 3 }}>
+                                        <Slider
+                                            value={[Number(filterMinAmount) || 0, Number(filterMaxAmount) || MAX_LIMIT]}
+                                            onChange={handleSliderChange}
+                                            valueLabelDisplay="auto"
+                                            min={MIN_LIMIT}
+                                            max={MAX_LIMIT}
+                                            step={1000000} // Bước nhảy 100k
+                                            sx={{ color: '#2e7d32' }}
+                                        />
+                                    </Box>
+
+                                    {/* 2 Ô nhập liệu bên dưới */}
+                                    <Stack direction="row" spacing={2} alignItems="center">
+                                        <TextField
+                                            label="Tối thiểu"
+                                            size="small"
+                                            type="number"
+                                            value={filterMinAmount}
+                                            onChange={(e) => setFilterMinAmount(e.target.value)}
+                                            onBlur={() => {
+                                                // Tránh trường hợp nhập min > max
+                                                if (Number(filterMinAmount) > Number(filterMaxAmount) && filterMaxAmount)
+                                                    setFilterMinAmount(filterMaxAmount);
+                                            }}
+                                        />
+                                        <Typography>-</Typography>
+                                        <TextField
+                                            label="Tối đa"
+                                            size="small"
+                                            type="number"
+                                            value={filterMaxAmount}
+                                            onChange={(e) => setFilterMaxAmount(e.target.value)}
+                                        />
+                                    </Stack>
+
+                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 1 }}>
+                                        <Button size="small" color="inherit" onClick={() => {
+                                            setFilterMinAmount("");
+                                            setFilterMaxAmount("");
+                                        }}>Xóa lọc</Button>
+                                        <Button size="small" variant="contained" color="success"
+                                                onClick={() => setPriceAnchorEl(null)}>Áp dụng</Button>
+                                    </Box>
+                                </Popover>
+                            </Grid>
+                        </Grid>
                     </Stack>
-                </DialogContent>
+                </Paper>
 
-                {/* Khu vực nút bấm trong Modal */}
-                <DialogActions sx={{p: 2, justifyContent: "space-between"}}>
-                    {/* Chỉ hiển thị nút Xóa nếu đang ở chế độ Chỉnh sửa */}
-                    {editingId ? (
-                        <Button
-                            onClick={handleDeleteClick}
-                            variant="contained"
-                            sx={{
-                                width: 100,
-                                backgroundColor: "#d32f2f",
-                                "&:hover": {
-                                    backgroundColor: "#b71c1c"
-                                }
-                            }}
-                        >
-                            Xóa
-                        </Button>
-                    ) : (
-                        <Box/> /* Thẻ rỗng để giữ layout cân đối dùng space-between */
-                    )}
+                {/* BẢNG DỮ LIỆU */}
+                <TableContainer component={Paper} elevation={3}>
+                    <Table>
+                        <TableHead sx={{backgroundColor: "#f5f5f5"}}>
+                            <TableRow>
+                                <TableCell><b>STT</b></TableCell>
+                                <TableCell><b>Tiêu đề</b></TableCell>
+                                <TableCell><b>Danh mục</b></TableCell>
+                                <TableCell><b>Ngày</b></TableCell>
+                                <TableCell align="right"><b>Số tiền</b></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {transactions.map((tx, index) => (
+                                <TableRow
+                                    key={tx.id}
+                                    hover
+                                    onClick={() => handleRowClick(tx)}
+                                    sx={{cursor: "pointer"}}
+                                >
+                                    <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                                    <TableCell>
+                                        <Typography variant="body1">{tx.title}</Typography>
+                                        {tx.note &&
+                                            <Typography variant="caption" color="text.secondary">{tx.note}</Typography>}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={tx.category?.name || "N/A"}
+                                            size="small"
+                                            sx={{
+                                                backgroundColor: tx.category?.color ? `${tx.category.color}22` : "#eeeeee",
+                                                color: tx.category?.color || "#666",
+                                                fontWeight: "bold",
+                                                border: `1px solid ${tx.category?.color || "#ddd"}`
+                                            }}
+                                        />
+                                    </TableCell>
+                                    <TableCell>{formatDate(tx.date)}</TableCell>
+                                    <TableCell align="right" sx={{
+                                        color: tx.amount > 0 ? "success.main" : "error.main",
+                                        fontWeight: "bold"
+                                    }}>
+                                        {tx.amount > 0 ? "+" : ""}{formatCurrency(tx.amount)}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {transactions.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center" sx={{py: 3}}>
+                                        Không tìm thấy giao dịch nào phù hợp!
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
 
-                    <Box sx={{display: 'flex', gap: 2}}>
-                        <Button onClick={handleClose} color="inherit" variant="outlined" sx={{width: 100}}>Hủy</Button>
-                        <Button onClick={handleSave} color="success" variant="contained" sx={{width: 100}}>Lưu</Button>
-                    </Box>
-                </DialogActions>
-            </Dialog>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={totalElements}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={(_e, newPage) => setPage(newPage)}
+                        onRowsPerPageChange={(e) => {
+                            setRowsPerPage(parseInt(e.target.value, 10));
+                            setPage(0);
+                        }}
+                        labelRowsPerPage="Số dòng mỗi trang:"
+                    />
+                </TableContainer>
 
-            {/* MODAL TẠO DANH MỤC NHANH */}
-            <Dialog open={openCategoryModal} onClose={() => setOpenCategoryModal(false)} maxWidth="xs" fullWidth>
-                <DialogTitle
-                    sx={{
+                {/* MODAL THÊM/SỬA GIAO DỊCH */}
+                <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+                    <DialogTitle sx={{
                         fontWeight: "bold",
-                        fontSize: "1.1rem",
+                        textAlign: "center",
                         backgroundColor: "#2e7d32",
                         color: "white"
-                    }}
-                >
-                    Tạo Danh Mục Nhanh
-                </DialogTitle>
-                <DialogContent dividers>
-                    <TextField
-                        autoFocus
-                        label="Tên danh mục mới"
-                        fullWidth
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        sx={{mt: 1}}
-                    />
-                </DialogContent>
-                <DialogActions sx={{p: 2}}>
-                    <Button onClick={() => setOpenCategoryModal(false)} color="inherit">
-                        Hủy
-                    </Button>
-                    <Button
-                        onClick={handleSaveQuickCategory}
-                        variant="contained"
+                    }}>
+                        {/* Đổi tiêu đề Modal dựa trên trạng thái editingId */}
+                        {editingId ? "Chỉnh sửa Giao Dịch" : "Thêm Giao Dịch Mới"}
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <Stack spacing={3} sx={{mt: 1}}>
+                            <Box sx={{display: "flex", justifyContent: "center"}}>
+                                <ToggleButtonGroup
+                                    color={transactionType === "INCOME" ? "success" : "error"}
+                                    value={transactionType}
+                                    exclusive
+                                    onChange={(_, newValue) => {
+                                        if (newValue) setTransactionType(newValue);
+                                    }}
+                                >
+                                    <ToggleButton value="EXPENSE" sx={{px: 4, fontWeight: "bold"}}>Khoản
+                                        Chi</ToggleButton>
+                                    <ToggleButton value="INCOME" sx={{px: 4, fontWeight: "bold"}}>Khoản
+                                        Thu</ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
+                            <TextField
+                                label="Tiêu đề giao dịch"
+                                fullWidth
+                                value={title}
+                                onChange={(e) => {
+                                    setTitle(e.target.value);
+                                    if (errors.title) setErrors(prev => ({...prev, title: ""}));
+                                }}
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 50,
+                                    },
+                                }}
+                                error={!!errors.title}
+                                helperText={errors.title}
+                                required
+                            />
+                            <Stack direction="row" spacing={2}>
+                                <TextField
+                                    label="Số tiền"
+                                    type="number"
+                                    fullWidth
+                                    value={amount}
+                                    onChange={(e) => {
+                                        setAmount(e.target.value);
+                                        if (errors.amount) setErrors(prev => ({...prev, amount: ""}));
+                                    }}
+                                    error={!!errors.amount}
+                                    helperText={errors.amount}
+                                    required
+                                />
+                                <TextField
+                                    label="Ngày thực hiện"
+                                    type="date"
+                                    fullWidth
+                                    slotProps={{inputLabel: {shrink: true}}}
+                                    value={date}
+                                    onChange={(e) => {
+                                        setDate(e.target.value);
+                                        if (errors.date) setErrors(prev => ({...prev, date: ""}));
+                                    }}
+                                    error={!!errors.date}
+                                    helperText={errors.date}
+                                    required
+                                />
+                            </Stack>
+                            <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                                <Autocomplete
+                                    sx={{flexGrow: 1}}
+                                    options={categories}
+                                    getOptionLabel={(option) => option.name}
+                                    value={selectedCategory}
+                                    onChange={(_, newValue) => {
+                                        setSelectedCategory(newValue);
+                                        if (errors.category) setErrors(prev => ({...prev, category: ""}));
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Chọn danh mục"
+                                            required
+                                            error={!!errors.category}
+                                            helperText={errors.category}
+                                        />
+                                    )}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                />
+                                <Button variant="outlined" color="primary" sx={{
+                                    height: 56,
+                                    minWidth: 56,
+                                    color: "#2e7d32",
+                                    borderColor: "#2e7d32",
+                                    "&:hover": {
+                                        borderColor: "#1b5e20",
+                                        backgroundColor: "rgba(46, 125, 50, 0.04)"
+                                    }
+                                }}
+                                        onClick={() => setOpenCategoryModal(true)}>
+                                    <AddIcon/>
+                                </Button>
+                            </Stack>
+                            <TextField
+                                label="Ghi chú (Tùy chọn)"
+                                multiline
+                                rows={2}
+                                fullWidth
+                                value={note}
+                                onChange={(e) => {
+                                    setNote(e.target.value);
+                                    if (errors.note) setErrors(prev => ({...prev, note: ""}));
+                                }}
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 255,
+                                    },
+                                }}
+                                error={!!errors.note}
+                                helperText={errors.note}
+                            />
+                        </Stack>
+                    </DialogContent>
+
+                    {/* Khu vực nút bấm trong Modal */}
+                    <DialogActions sx={{p: 2, justifyContent: "space-between"}}>
+                        {/* Chỉ hiển thị nút Xóa nếu đang ở chế độ Chỉnh sửa */}
+                        {editingId ? (
+                            <Button
+                                onClick={handleDeleteClick}
+                                variant="contained"
+                                sx={{
+                                    width: 100,
+                                    backgroundColor: "#d32f2f",
+                                    "&:hover": {
+                                        backgroundColor: "#b71c1c"
+                                    }
+                                }}
+                            >
+                                Xóa
+                            </Button>
+                        ) : (
+                            <Box/> /* Thẻ rỗng để giữ layout cân đối dùng space-between */
+                        )}
+
+                        <Box sx={{display: 'flex', gap: 2}}>
+                            <Button onClick={handleClose} color="inherit" variant="outlined"
+                                    sx={{width: 100}}>Hủy</Button>
+                            <Button onClick={handleSave} color="success" variant="contained"
+                                    sx={{width: 100}}>Lưu</Button>
+                        </Box>
+                    </DialogActions>
+                </Dialog>
+
+                {/* MODAL TẠO DANH MỤC NHANH */}
+                <Dialog open={openCategoryModal} onClose={() => setOpenCategoryModal(false)} maxWidth="xs" fullWidth>
+                    <DialogTitle
                         sx={{
+                            fontWeight: "bold",
+                            fontSize: "1.1rem",
                             backgroundColor: "#2e7d32",
-                            "&:hover": {
-                                backgroundColor: "#1b5e20"
-                            }
+                            color: "white"
                         }}
                     >
-                        Tạo
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                        Tạo Danh Mục Nhanh
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <TextField
+                            autoFocus
+                            label="Tên danh mục mới"
+                            fullWidth
+                            value={newCategoryName}
+                            onChange={(e) => {
+                                setNewCategoryName(e.target.value);
+                                if (categoryError) setCategoryError("");
+                            }}
+                            slotProps={{
+                                htmlInput: {
+                                    maxLength: 30,
+                                },
+                            }}
+                            error={!!categoryError}
+                            helperText={categoryError}
+                            sx={{mt: 1}}
+                            required
+                        />
+                    </DialogContent>
+                    <DialogActions sx={{p: 2}}>
+                        <Button onClick={() => setOpenCategoryModal(false)} color="inherit">
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={handleSaveQuickCategory}
+                            variant="contained"
+                            sx={{
+                                backgroundColor: "#2e7d32",
+                                "&:hover": {
+                                    backgroundColor: "#1b5e20"
+                                }
+                            }}
+                        >
+                            Tạo
+                        </Button>
+                    </DialogActions>
+                </Dialog>
 
-            {/* MODAL XÁC NHẬN XÓA */}
-            <Dialog open={openConfirmDelete} onClose={() => setOpenConfirmDelete(false)} maxWidth="xs" fullWidth>
-                <DialogTitle
-                    sx={{
-                        fontWeight: "bold",
-                        backgroundColor: "#d32f2f",
-                        color: "white",
-                        textAlign: "center"
-                    }}
-                >
-                    Xác nhận xóa
-                </DialogTitle>
-                <DialogContent dividers>
-                    <Typography>
-                        Bạn có chắc chắn muốn xóa giao dịch này? Hành động này không thể hoàn tác.
-                    </Typography>
-                </DialogContent>
-                <DialogActions sx={{p: 2}}>
-                    <Button onClick={() => setOpenConfirmDelete(false)} color="inherit" variant="outlined">
-                        Hủy
-                    </Button>
-                    <Button onClick={executeDelete} color="error" variant="contained">
-                        Đồng ý Xóa
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Container>
+                {/* MODAL XÁC NHẬN XÓA */}
+                <Dialog open={openConfirmDelete} onClose={() => setOpenConfirmDelete(false)} maxWidth="xs" fullWidth>
+                    <DialogTitle
+                        sx={{
+                            fontWeight: "bold",
+                            backgroundColor: "#d32f2f",
+                            color: "white",
+                            textAlign: "center"
+                        }}
+                    >
+                        Xác nhận xóa
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <Typography>
+                            Bạn có chắc chắn muốn xóa giao dịch này? Hành động này không thể hoàn tác.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions sx={{p: 2}}>
+                        <Button onClick={() => setOpenConfirmDelete(false)} color="inherit" variant="outlined">
+                            Hủy
+                        </Button>
+                        <Button onClick={executeDelete} color="error" variant="contained">
+                            Đồng ý Xóa
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
+        </LocalizationProvider>
     );
 };
 
