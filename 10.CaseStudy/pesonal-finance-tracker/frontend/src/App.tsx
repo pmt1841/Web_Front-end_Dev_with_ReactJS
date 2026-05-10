@@ -1,7 +1,7 @@
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
-import DashboardPage from "./pages/DashboardPage";
-import TransactionPage from "./pages/TransactionPage";
-import CategoryPage from "./pages/CategoryPage";
+import {DashboardPage} from "./components/Dashboard";
+import {TransactionPage} from "./components/Transaction";
+import {CategoryPage} from "./components/Category";
 import Navbar, {drawerWidth} from "./components/Navbar";
 import {Box} from "@mui/material";
 
