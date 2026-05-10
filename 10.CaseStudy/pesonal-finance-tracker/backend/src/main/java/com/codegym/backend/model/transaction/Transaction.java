@@ -22,6 +22,7 @@ public class Transaction {
 
     @NotBlank(message = "Tiêu đề không được để trống")
     @Size(max = 50, message = "Tiêu đề không được quá 50 ký tự")
+    @Column(columnDefinition = "VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")
     private String title;
 
     @NotNull(message = "Số tiền không được để trống")
@@ -38,6 +39,7 @@ public class Transaction {
     private LocalDate date;
 
     @Size(max = 255, message = "Ghi chú không được quá 255 ký tự")
+    @Column(columnDefinition = "TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")
     private String note;
 
     @JsonIgnore // Cực kỳ quan trọng: Ngăn không cho trường này lọt vào chuỗi JSON trả về

@@ -23,25 +23,16 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
 
     @Override
-    public Page<Transaction> getAllTransactions(String keyword, Integer categoryId, TransactionType type,
-                                                LocalDate startDate, LocalDate endDate,
-                                                Long minAmount, Long maxAmount, Pageable pageable) {
-
+    public Page<Transaction> getAllTransactions(String keyword, Integer categoryId,
+                                                TransactionType type, LocalDate startDate,
+                                                LocalDate endDate, Long minAmount,
+                                                Long maxAmount, Pageable pageable) {
         LocalDate start = (startDate != null) ? startDate : LocalDate.of(1900, 1, 1);
         LocalDate end = (endDate != null) ? endDate : LocalDate.of(2100, 12, 31);
         String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
         String searchType = (type != null) ? type.name() : null;
 
-        return transactionRepository.filterTransactions(
-                searchKeyword,
-                categoryId,
-                searchType,
-                start,
-                end,
-                minAmount,
-                maxAmount,
-                pageable
-        );
+        return transactionRepository.filterTransactions(searchKeyword, categoryId, searchType, start, end, minAmount, maxAmount, pageable);
     }
 
     @Override
