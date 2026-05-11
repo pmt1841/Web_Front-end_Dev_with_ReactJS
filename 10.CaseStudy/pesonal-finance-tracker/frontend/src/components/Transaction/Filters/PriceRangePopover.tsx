@@ -51,7 +51,7 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
             const currentPreset = PRICE_PRESETS.find(p => p.min === filterMinAmount && p.max === filterMaxAmount);
             setTempPreset(currentPreset ? currentPreset.label : 'Tùy chỉnh');
         }
-    }, [priceAnchorEl, filterMinAmount, filterMaxAmount]);
+    }, [priceAnchorEl, filterMinAmount, filterMaxAmount, PRICE_PRESETS]);
 
     const handlePresetChange = (preset: PricePreset) => {
         setTempPreset(preset.label);
