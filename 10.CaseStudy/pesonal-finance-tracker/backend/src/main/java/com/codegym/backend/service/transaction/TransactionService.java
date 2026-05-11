@@ -33,4 +33,5 @@ public interface TransactionService {
     List<CategoryStatDto> getCategoryStats();
 
     List<MonthlyStatDto> getMonthlyStats();
+
 }

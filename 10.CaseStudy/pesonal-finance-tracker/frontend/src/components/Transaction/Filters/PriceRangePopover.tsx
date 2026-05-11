@@ -1,6 +1,6 @@
 // src/components/Transaction/Filters/PriceRangePopover.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     TextField, Popover, Box, Typography, RadioGroup,
     FormControlLabel, Radio, Divider, Stack, Button
@@ -26,7 +26,12 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                                                                  setFilterMaxAmount
                                                              }) => {
     const [priceAnchorEl, setPriceAnchorEl] = useState<HTMLDivElement | null>(null);
-    const [pricePreset, setPricePreset] = useState('Tất cả');
+
+    // --- STATE TẠM THỜI (Draft) ---
+    const [tempMin, setTempMin] = useState(filterMinAmount);
+    const [tempMax, setTempMax] = useState(filterMaxAmount);
+    const [tempPreset, setTempPreset] = useState('Tất cả');
+
     const MAX_LIMIT = 100000000;
 
     const PRICE_PRESETS: PricePreset[] = [
@@ -37,18 +42,48 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
         { label: 'Trên 50 triệu', min: "50000000", max: "" },
     ];
 
+    // Mỗi khi mở Popover, đồng bộ state tạm với giá trị thật đang áp dụng
+    useEffect(() => {
+        if (Boolean(priceAnchorEl)) {
+            setTempMin(filterMinAmount);
+            setTempMax(filterMaxAmount);
+            // Tìm preset tương ứng nếu có
+            const currentPreset = PRICE_PRESETS.find(p => p.min === filterMinAmount && p.max === filterMaxAmount);
+            setTempPreset(currentPreset ? currentPreset.label : 'Tùy chỉnh');
+        }
+    }, [priceAnchorEl, filterMinAmount, filterMaxAmount]);
+
     const handlePresetChange = (preset: PricePreset) => {
-        setPricePreset(preset.label);
-        setFilterMinAmount(preset.min);
-        setFilterMaxAmount(preset.max);
+        setTempPreset(preset.label);
+        setTempMin(preset.min);
+        setTempMax(preset.max);
     };
 
-    const handlePriceClose = () => {
+    const handleApply = () => {
+        setFilterMinAmount(tempMin);
+        setFilterMaxAmount(tempMax);
         setPriceAnchorEl(null);
     };
 
+    const handleReset = () => {
+        setTempMin("");
+        setTempMax("");
+        setTempPreset("Tất cả");
+        setFilterMinAmount("");
+        setFilterMaxAmount("");
+        setPriceAnchorEl(null);
+    };
+
+    const formatCurrency = (amount: number): string => {
+        if (amount >= 1000000) {
+            const million = amount / 1000000;
+            return `${million.toFixed(million % 1 === 0 ? 0 : 1)} tr`;
+        }
+        return amount.toLocaleString('vi-VN');
+    };
+
     const displayPriceRange = (filterMinAmount || filterMaxAmount)
-        ? `${Number(filterMinAmount || 0).toLocaleString()} - ${Number(filterMaxAmount || MAX_LIMIT).toLocaleString()}`
+        ? `${filterMinAmount ? formatCurrency(Number(filterMinAmount)) : '0'} - ${filterMaxAmount ? formatCurrency(Number(filterMaxAmount)) : formatCurrency(MAX_LIMIT)}`
         : "";
 
     return (
@@ -61,18 +96,8 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                 onClick={(e) => setPriceAnchorEl(e.currentTarget)}
                 placeholder="Tất cả"
                 slotProps={{
-                    input: {
-                        readOnly: true,
-                        sx: { cursor: 'pointer' }
-                    },
-                    htmlInput: {
-                        sx: {
-                            cursor: 'pointer',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden'
-                        }
-                    }
+                    input: { readOnly: true, sx: { cursor: 'pointer' } },
+                    htmlInput: { sx: { cursor: 'pointer', textOverflow: 'ellipsis' } }
                 }}
             />
             <Popover
@@ -80,15 +105,14 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                 anchorEl={priceAnchorEl}
                 onClose={() => setPriceAnchorEl(null)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                slotProps={{ paper: { sx: { p: 3, width: 350 } } }}
             >
-                <Box sx={{ p: 2, width: 250 }}>
+                <Box sx={{ p: 3, width: 280 }}>
                     <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
                         Chọn nhanh khoảng giá
                     </Typography>
 
                     <RadioGroup
-                        value={pricePreset}
+                        value={tempPreset}
                         onChange={(e) => {
                             const selected = PRICE_PRESETS.find(p => p.label === e.target.value);
                             if (selected) handlePresetChange(selected);
@@ -99,7 +123,7 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                                 key={preset.label}
                                 value={preset.label}
                                 control={<Radio size="small" color="success" />}
-                                label={<Typography variant="body2">{ preset.label }</Typography>}
+                                label={<Typography variant="body2">{preset.label}</Typography>}
                             />
                         ))}
                     </RadioGroup>
@@ -115,22 +139,53 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                             label="Tối thiểu"
                             size="small"
                             type="number"
-                            value={filterMinAmount}
-                            onChange={(e) => setFilterMinAmount(e.target.value)}
+                            value={tempMin}
+                            onChange={(e) => {
+                                setTempMin(e.target.value);
+                                setTempPreset('Tùy chỉnh');
+                            }}
                         />
                         <TextField
                             label="Tối đa"
                             size="small"
                             type="number"
-                            value={filterMaxAmount}
-                            onChange={(e) => setFilterMaxAmount(e.target.value)}
+                            value={tempMax}
+                            onChange={(e) => {
+                                setTempMax(e.target.value);
+                                setTempPreset('Tùy chỉnh');
+                            }}
                         />
                     </Stack>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                        <Button onClick={handlePriceClose} variant="contained" color="success" size="small">
-                            Áp dụng
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
+                        <Button
+                            onClick={handleReset}
+                            variant="text"
+                            color="error"
+                            size="small"
+                            sx={{ textTransform: 'none' }}
+                        >
+                            Xóa lọc
                         </Button>
+
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Button
+                                size="small"
+                                onClick={() => setPriceAnchorEl(null)}
+                                sx={{ textTransform: 'none' }}
+                            >
+                                Hủy
+                            </Button>
+                            <Button
+                                onClick={handleApply}
+                                variant="contained"
+                                color="success"
+                                size="small"
+                                sx={{ textTransform: 'none' }}
+                            >
+                                Áp dụng
+                            </Button>
+                        </Box>
                     </Box>
                 </Box>
             </Popover>

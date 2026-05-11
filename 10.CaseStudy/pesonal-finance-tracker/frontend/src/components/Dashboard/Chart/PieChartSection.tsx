@@ -13,6 +13,13 @@ interface PieChartSectionProps {
 const PieChartSection: React.FC<PieChartSectionProps> = ({ pieData, isLoading }) => {
     const totalPieValue = pieData.reduce((sum, item) => sum + item.value, 0);
 
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+        }).format(value);
+    };
+
     return (
         <Grow in={true} timeout={1600}>
             <Paper sx={{ p: 3, borderRadius: 2, height: 450 }}>
@@ -25,18 +32,32 @@ const PieChartSection: React.FC<PieChartSectionProps> = ({ pieData, isLoading })
                             {
                                 data: pieData,
                                 innerRadius: 60,
-                                paddingAngle: 5,
+                                paddingAngle: 2,
                                 cornerRadius: 5,
+                                // --- THÊM PHẦN NÀY ĐỂ HIỆN % ---
+                                arcLabel: (item) => {
+                                    const percent = (item.value / totalPieValue) * 100;
+                                    // Chỉ hiển thị nếu miếng bánh đủ lớn (ví dụ > 5%) để tránh đè chữ
+                                    return percent > 5 ? `${percent.toFixed(0)}%` : '';
+                                },
+                                arcLabelMinAngle: 30,
                             },
                         ]}
                         width={300}
                         height={300}
                         skipAnimation={false}
                         sx={{
-                            '& .MuiChartsLegend-root': { display: 'none' }
+                            '& .MuiChartsLegend-root': { display: 'none' },
+                            // Tùy chỉnh font chữ % bên trong biểu đồ
+                            '& .MuiChartsArcLabel-root': {
+                                fill: 'white',
+                                fontSize: 12,
+                                fontWeight: 'bold',
+                            },
                         }}
                     />
                 </Box>
+
                 <Stack spacing={1} sx={{ mt: 2 }}>
                     {!isLoading && pieData.slice(0, 3).map((item) => (
                         <Box key={item.id} sx={{
@@ -51,10 +72,13 @@ const PieChartSection: React.FC<PieChartSectionProps> = ({ pieData, isLoading })
                                     borderRadius: '50%',
                                     bgcolor: item.color
                                 }} />
-                                <Typography variant="body2">{item.label}</Typography>
+                                <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                                    {item.label}
+                                </Typography>
                             </Stack>
+                            {/* --- SỬA LẠI THÀNH HIỂN THỊ TIỀN --- */}
                             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                {totalPieValue > 0 ? ((item.value / totalPieValue) * 100).toFixed(1) : 0}%
+                                {formatCurrency(Math.abs(item.value))}
                             </Typography>
                         </Box>
                     ))}
