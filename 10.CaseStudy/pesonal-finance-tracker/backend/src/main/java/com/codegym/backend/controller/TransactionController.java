@@ -1,10 +1,10 @@
 package com.codegym.backend.controller;
 
-import com.codegym.backend.model.dto.CategoryStatDto;
-import com.codegym.backend.model.dto.MonthlyStatDto;
-import com.codegym.backend.model.dto.SummaryStatDto;
-import com.codegym.backend.model.transaction.Transaction;
-import com.codegym.backend.model.transaction.TransactionType;
+import com.codegym.backend.dto.category.CategoryStatDto;
+import com.codegym.backend.dto.transaction.MonthlyStatDto;
+import com.codegym.backend.dto.transaction.SummaryStatDto;
+import com.codegym.backend.dto.transaction.TransactionFilter;
+import com.codegym.backend.entity.transaction.Transaction;
 import com.codegym.backend.service.transaction.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,17 +26,10 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<Page<Transaction>> getAll(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) TransactionType type,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) Long minAmount,
-            @RequestParam(required = false) Long maxAmount,
+            TransactionFilter filter,
             @PageableDefault(size = 5, sort = "date", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return ResponseEntity.ok(transactionService.getAllTransactions(
-                keyword, categoryId, type, startDate, endDate, minAmount, maxAmount, pageable));
+        return ResponseEntity.ok(transactionService.getAllTransactions(filter, pageable));
     }
 
     @PostMapping

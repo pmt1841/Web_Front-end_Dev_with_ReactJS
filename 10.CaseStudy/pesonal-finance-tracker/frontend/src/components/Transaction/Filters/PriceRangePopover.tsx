@@ -1,6 +1,6 @@
 // src/components/Transaction/Filters/PriceRangePopover.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
     TextField, Popover, Box, Typography, RadioGroup,
     FormControlLabel, Radio, Divider, Stack, Button
@@ -19,6 +19,14 @@ interface PriceRangePopoverProps {
     setFilterMaxAmount: (value: string) => void;
 }
 
+const PRICE_PRESETS: PricePreset[] = [
+    { label: 'Tất cả', min: "", max: "" },
+    { label: '0 - 1 triệu', min: "0", max: "1000000" },
+    { label: '1 - 10 triệu', min: "1000000", max: "10000000" },
+    { label: '10 - 50 triệu', min: "10000000", max: "50000000" },
+    { label: 'Trên 50 triệu', min: "50000000", max: "" },
+];
+
 const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                                                                  filterMinAmount,
                                                                  setFilterMinAmount,
@@ -34,24 +42,19 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
 
     const MAX_LIMIT = 100000000;
 
-    const PRICE_PRESETS: PricePreset[] = [
-        { label: 'Tất cả', min: "", max: "" },
-        { label: '0 - 1 triệu', min: "0", max: "1000000" },
-        { label: '1 - 10 triệu', min: "1000000", max: "10000000" },
-        { label: '10 - 50 triệu', min: "10000000", max: "50000000" },
-        { label: 'Trên 50 triệu', min: "50000000", max: "" },
-    ];
+    const syncTempState = useCallback(() => {
+        setTempMin(filterMinAmount);
+        setTempMax(filterMaxAmount);
+        const currentPreset = PRICE_PRESETS.find(p => p.min === filterMinAmount && p.max === filterMaxAmount);
+        setTempPreset(currentPreset ? currentPreset.label : 'Tùy chỉnh');
+    }, [filterMinAmount, filterMaxAmount]);
 
     // Mỗi khi mở Popover, đồng bộ state tạm với giá trị thật đang áp dụng
     useEffect(() => {
-        if (Boolean(priceAnchorEl)) {
-            setTempMin(filterMinAmount);
-            setTempMax(filterMaxAmount);
-            // Tìm preset tương ứng nếu có
-            const currentPreset = PRICE_PRESETS.find(p => p.min === filterMinAmount && p.max === filterMaxAmount);
-            setTempPreset(currentPreset ? currentPreset.label : 'Tùy chỉnh');
+        if (!priceAnchorEl) {
+            syncTempState();
         }
-    }, [priceAnchorEl, filterMinAmount, filterMaxAmount, PRICE_PRESETS]);
+    }, [priceAnchorEl, syncTempState]);
 
     const handlePresetChange = (preset: PricePreset) => {
         setTempPreset(preset.label);

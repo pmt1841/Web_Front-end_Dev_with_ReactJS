@@ -1,7 +1,7 @@
 package com.codegym.backend.controller;
 
-import com.codegym.backend.model.dto.BudgetRequest;
-import com.codegym.backend.model.dto.BudgetStatDto;
+import com.codegym.backend.dto.budget.BudgetRequest;
+import com.codegym.backend.dto.budget.BudgetStatDto;
 import com.codegym.backend.service.budget.BudgetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

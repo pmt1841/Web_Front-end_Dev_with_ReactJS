@@ -1,15 +1,17 @@
 package com.codegym.backend.service.transaction.impl;
 
-import com.codegym.backend.model.dto.CategoryStatDto;
-import com.codegym.backend.model.dto.MonthlyStatDto;
-import com.codegym.backend.model.dto.SummaryStatDto;
-import com.codegym.backend.model.transaction.Transaction;
-import com.codegym.backend.model.transaction.TransactionType;
+import com.codegym.backend.dto.category.CategoryStatDto;
+import com.codegym.backend.dto.transaction.MonthlyStatDto;
+import com.codegym.backend.dto.transaction.SummaryStatDto;
+import com.codegym.backend.dto.transaction.TransactionFilter;
+import com.codegym.backend.entity.transaction.Transaction;
 import com.codegym.backend.repository.TransactionRepository;
+import com.codegym.backend.repository.specification.TransactionSpecifications;
 import com.codegym.backend.service.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,16 +25,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
 
     @Override
-    public Page<Transaction> getAllTransactions(String keyword, Integer categoryId,
-                                                TransactionType type, LocalDate startDate,
-                                                LocalDate endDate, Long minAmount,
-                                                Long maxAmount, Pageable pageable) {
-        LocalDate start = (startDate != null) ? startDate : LocalDate.of(1900, 1, 1);
-        LocalDate end = (endDate != null) ? endDate : LocalDate.of(2100, 12, 31);
-        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
-        String searchType = (type != null) ? type.name() : null;
-
-        return transactionRepository.filterTransactions(searchKeyword, categoryId, searchType, start, end, minAmount, maxAmount, pageable);
+    public Page<Transaction> getAllTransactions(TransactionFilter filter, Pageable pageable) {
+        Specification<Transaction> spec = TransactionSpecifications.getFilter(filter);
+        return transactionRepository.findAll(spec, pageable);
     }
 
     @Override

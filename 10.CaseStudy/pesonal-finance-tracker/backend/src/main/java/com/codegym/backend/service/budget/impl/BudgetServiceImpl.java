@@ -1,7 +1,7 @@
 package com.codegym.backend.service.budget.impl;
 
-import com.codegym.backend.model.budget.Budget;
-import com.codegym.backend.model.dto.BudgetStatDto;
+import com.codegym.backend.entity.budget.Budget;
+import com.codegym.backend.dto.budget.BudgetStatDto;
 import com.codegym.backend.repository.BudgetRepository;
 import com.codegym.backend.repository.TransactionRepository;
 import com.codegym.backend.service.budget.BudgetService;

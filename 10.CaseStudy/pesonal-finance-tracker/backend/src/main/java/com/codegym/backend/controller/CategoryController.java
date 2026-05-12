@@ -1,6 +1,6 @@
 package com.codegym.backend.controller;
 
-import com.codegym.backend.model.category.Category;
+import com.codegym.backend.entity.category.Category;
 import com.codegym.backend.service.category.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

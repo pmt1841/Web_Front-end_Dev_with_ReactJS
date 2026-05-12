@@ -1,6 +1,6 @@
 package com.codegym.backend.service.category;
 
-import com.codegym.backend.model.category.Category;
+import com.codegym.backend.entity.category.Category;
 import jakarta.validation.Valid;
 
 import java.util.List;

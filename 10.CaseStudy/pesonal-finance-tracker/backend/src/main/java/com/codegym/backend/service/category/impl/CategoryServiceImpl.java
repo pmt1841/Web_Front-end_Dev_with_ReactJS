@@ -1,6 +1,6 @@
 package com.codegym.backend.service.category.impl;
 
-import com.codegym.backend.model.category.Category;
+import com.codegym.backend.entity.category.Category;
 import com.codegym.backend.repository.CategoryRepository;
 import com.codegym.backend.service.category.CategoryService;
 import lombok.RequiredArgsConstructor;
