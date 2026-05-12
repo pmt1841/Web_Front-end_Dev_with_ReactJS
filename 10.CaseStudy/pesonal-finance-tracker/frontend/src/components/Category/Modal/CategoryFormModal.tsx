@@ -5,7 +5,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, ToggleButton, ToggleButtonGroup, Box, Stack, Button
 } from '@mui/material';
-import type {Category} from '../../../types/interface';
+import type {Category} from '../../../types/transaction';
 import {ColorPicker, IconPicker} from '../index';
 
 interface CategoryFormModalProps {

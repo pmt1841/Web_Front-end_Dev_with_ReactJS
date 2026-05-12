@@ -30,7 +30,7 @@ const DateRangePopover: React.FC<DateRangePopoverProps> = ({
 
     // Mỗi khi mở Popover, đồng bộ State tạm thời với giá trị đã áp dụng trước đó
     useEffect(() => {
-        if (Boolean(anchorEl)) {
+        if (anchorEl) {
             setTempStart(filterStartDate ? dayjs(filterStartDate) : null);
             setTempEnd(filterEndDate ? dayjs(filterEndDate) : null);
         }

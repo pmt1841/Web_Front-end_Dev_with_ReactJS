@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Container, Grid, Box, Typography, Grow } from "@mui/material";
 import api from "../../services/api";
-import type { Transaction, PageResponse, SummaryStats, MonthlyStat, CategoryStat } from "../../types/interface";
+import type { Transaction, PageResponse, SummaryStats, MonthlyStat, CategoryStat } from "../../types";
 import { SummaryCard, BarChartSection, PieChartSection, RecentTransactionsList, BudgetCard, BudgetSettingModal } from '../Dashboard';
 
 const CHART_COLORS = ['#f44336', '#ff9800', '#2196f3', '#9c27b0', '#009688', '#795548'];

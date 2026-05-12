@@ -7,7 +7,7 @@ import {
     Box, Stack, Button
 } from '@mui/material';
 import {Add as AddIcon} from '@mui/icons-material';
-import type {Category} from '../../../types/interface';
+import type {Category} from '../../../types';
 
 interface TransactionFormProps {
     open: boolean;

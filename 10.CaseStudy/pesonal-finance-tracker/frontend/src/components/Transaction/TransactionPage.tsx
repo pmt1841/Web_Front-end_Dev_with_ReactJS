@@ -7,7 +7,7 @@ import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 
 import api from "../../services/api";
-import type {Transaction, Category, PageResponse} from "../../types/interface";
+import type {Transaction, Category, PageResponse} from "../../types";
 import {
     FilterBar,
     TransactionTable,

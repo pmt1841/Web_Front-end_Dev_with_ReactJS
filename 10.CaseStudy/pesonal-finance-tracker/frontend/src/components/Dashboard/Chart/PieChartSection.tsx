@@ -3,7 +3,7 @@
 import React from 'react';
 import { Paper, Typography, Box, Stack, Grow } from '@mui/material';
 import { PieChart } from '@mui/x-charts/PieChart';
-import type { CategoryStat } from '../../../types/interface';
+import type { CategoryStat } from '../../../types/category';
 
 interface PieChartSectionProps {
     pieData: (CategoryStat & { color: string })[];

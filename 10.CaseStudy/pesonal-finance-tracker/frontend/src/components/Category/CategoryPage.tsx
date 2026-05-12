@@ -6,7 +6,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 
 import api from "../../services/api";
-import type { Category } from "../../types/interface";
+import type { Category } from "../../types/transaction";
 import {CategoryCard, CategoryFormModal, CategoryDeleteModal} from "../Category";
 
 const CategoryPage = () => {

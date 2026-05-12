@@ -6,7 +6,7 @@ import {
     Stack, Box, Typography
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import type {Category} from '../../types/interface';
+import type {Category} from '../../types/transaction';
 import {DynamicIcon} from '../Category';
 
 interface CategoryCardProps {

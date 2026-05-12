@@ -3,7 +3,7 @@
 import React from 'react';
 import {Paper, Typography, Grow} from '@mui/material';
 import {BarChart} from '@mui/x-charts/BarChart';
-import type {MonthlyStat} from '../../../types/interface';
+import type {MonthlyStat} from '../../../types/dashboard';
 
 interface BarChartSectionProps {
     barData: MonthlyStat[];

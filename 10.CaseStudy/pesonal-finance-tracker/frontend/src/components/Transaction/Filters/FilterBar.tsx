@@ -6,7 +6,7 @@ import {
     Grid, Paper, IconButton, Tooltip
 } from '@mui/material';
 import {Refresh as RefreshIcon} from '@mui/icons-material';
-import type {Category} from '../../../types/interface';
+import type {Category} from '../../../types';
 import {DateRangePopover, PriceRangePopover} from '../../Transaction';
 
 interface FilterBarProps {

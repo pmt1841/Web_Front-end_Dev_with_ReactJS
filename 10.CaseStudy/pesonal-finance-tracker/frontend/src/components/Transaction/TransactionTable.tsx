@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import {TableSortLabel} from '@mui/material';
 import {Edit as EditIcon} from '@mui/icons-material';
-import type {Transaction, Category} from '../../types/interface';
+import type {Transaction, Category} from '../../types';
 
 interface TransactionTableProps {
     transactions: Transaction[];

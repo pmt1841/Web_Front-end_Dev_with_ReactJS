@@ -5,7 +5,7 @@ import {
     Paper, Typography, Box, Stack, Divider,
     CircularProgress, Grow
 } from '@mui/material';
-import type { Transaction } from '../../types/interface';
+import type { Transaction } from '../../types/transaction';
 
 interface RecentTransactionsListProps {
     transactions: Transaction[];
