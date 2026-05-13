@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "id": "P001",
+      "name": "Áo thun nam",
+      "importDate": "2024-05-03",
+      "quantity": 10,
+      "typeId": "T001"
+    },
+    {
+      "id": "P002",
+      "name": "Quần jean nữ",
+      "importDate": "2024-05-31",
+      "quantity": 5,
+      "typeId": "T002"
+    },
+    {
+      "id": "P003",
+      "name": "Áo khoác",
+      "importDate": "2024-05-04",
+      "quantity": 20,
+      "typeId": "T001"
+    }
+  ],
+  "types": [
+    {
+      "id": "T001",
+      "name": "Áo"
+    },
+    {
+      "id": "T002",
+      "name": "Quần"
+    },
+    {
+      "id": "T003",
+      "name": "Phụ kiện"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
