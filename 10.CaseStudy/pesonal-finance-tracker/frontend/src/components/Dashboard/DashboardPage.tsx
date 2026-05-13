@@ -41,6 +41,7 @@ const DashboardPage = () => {
 
         } catch (error) {
             console.error("Lỗi tải dữ liệu dashboard:", error);
+            alert("Không thể tải dữ liệu trang tổng quan")
         } finally {
             setIsLoading(false);
         }

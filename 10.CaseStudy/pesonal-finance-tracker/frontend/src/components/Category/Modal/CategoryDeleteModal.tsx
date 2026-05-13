@@ -6,7 +6,7 @@ import {
     DialogContentText, Button
 } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
-import type {Category} from '../../../types/transaction';
+import type {Category} from '../../../types';
 
 interface CategoryDeleteModalProps {
     open: boolean;

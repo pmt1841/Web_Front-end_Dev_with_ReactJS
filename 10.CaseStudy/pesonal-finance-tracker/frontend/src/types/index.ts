@@ -2,5 +2,5 @@
 
 export * from './transaction';
 export * from './category';
-export * from './dashboard';
+export * from './stat';
 export * from './budget';

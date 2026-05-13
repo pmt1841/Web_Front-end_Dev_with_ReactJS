@@ -95,6 +95,7 @@ const TransactionPage = () => {
             setCategories(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh mục:", error);
+            alert("Không thể tải dữ liệu danh sách danh mục")
         }
     }, []);
 
