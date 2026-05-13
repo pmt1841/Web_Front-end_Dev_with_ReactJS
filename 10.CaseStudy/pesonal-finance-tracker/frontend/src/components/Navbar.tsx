@@ -31,8 +31,8 @@ const Navbar = () => {
         <Box sx={{ color: 'white' }}>
             <Toolbar sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 2 }}>
                 <AccountBalanceWalletIcon />
-                <Typography variant="h6" noWrap sx={{ fontWeight: 'bold' }}>
-                    Finance App
+                <Typography variant="h5" noWrap sx={{ fontWeight: 'bold' }}>
+                    Finance Tracker
                 </Typography>
             </Toolbar>
             <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />

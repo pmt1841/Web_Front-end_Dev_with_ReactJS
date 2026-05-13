@@ -9,6 +9,30 @@ interface BarChartSectionProps {
     barData: MonthlyStat[];
 }
 
+const formatCurrencyShort = (value: number) => {
+    const absVal = Math.abs(value);
+    if (absVal === 0) return "0";
+
+    if (absVal >= 1000000) {
+        return `${(absVal / 1000000).toLocaleString('vi-VN')} Tr`;
+    }
+    if (absVal >= 1000) {
+        return `${(absVal / 1000).toLocaleString('vi-VN')} k`;
+    }
+    return absVal.toLocaleString('vi-VN');
+};
+
+const formatBarLabel = (item: { value: number | null }) => {
+    const val = item.value ?? 0;
+    if (val === 0) return "";
+    return formatCurrencyShort(val);
+};
+
+const formatYAxis = (value: number | null) => {
+    const val = value ?? 0;
+    return formatCurrencyShort(val);
+};
+
 const BarChartSection: React.FC<BarChartSectionProps> = ({barData}) => {
     const formattedBarData = barData.map(item => ({
         ...item,
@@ -20,7 +44,7 @@ const BarChartSection: React.FC<BarChartSectionProps> = ({barData}) => {
         <Grow in={true} timeout={1200}>
             <Paper sx={{p: 3, borderRadius: 2, height: 450}}>
                 <Typography variant="h6" sx={{fontWeight: "bold", mb: 2}}>
-                    Xu hướng tài chính ({new Date().getFullYear()})
+                    Xu hướng tài chính {new Date().getFullYear()}
                 </Typography>
                 <BarChart
                     dataset={formattedBarData}
@@ -30,34 +54,22 @@ const BarChartSection: React.FC<BarChartSectionProps> = ({barData}) => {
                             dataKey: 'income',
                             label: 'Thu nhập',
                             color: '#4caf50',
-                            barLabel: (item) => {
-                                const val = item.value ?? 0;
-                                if (val >= 1000000) return `${(val / 1000000).toFixed(1)}Tr`;
-                                if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
-                                return val.toString();
-                            }
+                            barLabel: formatBarLabel,
+                            barLabelPlacement: 'outside'
                         },
                         {
                             dataKey: 'limit',
                             label: 'Hạn mức',
                             color: '#e0e0e0',
-                            barLabel: (item) => {
-                                const val = item.value ?? 0;
-                                if (val >= 1000000) return `${(val / 1000000).toFixed(1)}Tr`;
-                                if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
-                                return val.toString();
-                            }
+                            barLabel: formatBarLabel,
+                            barLabelPlacement: 'outside'
                         },
                         {
                             dataKey: 'expense',
                             label: 'Chi tiêu',
                             color: '#f44336',
-                            barLabel: (item) => {
-                                const val = Math.abs(item.value ?? 0);
-                                if (val >= 1000000) return `${(val / 1000000).toFixed(1)}Tr`;
-                                if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
-                                return val.toString();
-                            }
+                            barLabel: formatBarLabel,
+                            barLabelPlacement: 'outside'
                         },
                     ]}
                     slotProps={{
@@ -72,12 +84,8 @@ const BarChartSection: React.FC<BarChartSectionProps> = ({barData}) => {
                     height={350}
                     margin={{left: 80}}
                     yAxis={[{
-                        label: 'Số tiền',
-                        valueFormatter: (value : number) => {
-                            if (value >= 1000000) return `${(value / 1000000).toLocaleString()} Tr`;
-                            if (value >= 1000) return `${(value / 1000).toLocaleString()} k`;
-                            return value.toLocaleString();
-                        }
+                        label: 'Số tiền (VNĐ)',
+                        valueFormatter: formatYAxis,
                     }]}
                     skipAnimation={false}
                 />

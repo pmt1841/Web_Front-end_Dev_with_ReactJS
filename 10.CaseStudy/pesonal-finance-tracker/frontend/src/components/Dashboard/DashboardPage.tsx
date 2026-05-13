@@ -50,6 +50,7 @@ const DashboardPage = () => {
         try {
             const response =  await api.put("/budget", { monthlyLimit: newLimit });
             setBudget(response.data);
+            await fetchDashboardData();
         } catch (error) {
             console.error("Lỗi cập nhật budget:", error);
             throw error;

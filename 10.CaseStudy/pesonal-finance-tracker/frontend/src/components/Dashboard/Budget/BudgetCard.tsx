@@ -5,12 +5,7 @@ import {Card, CardContent, Typography, Box, LinearProgress, Stack, Chip, Tooltip
 import {Grow} from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import {Settings as SettingsIcon} from '@mui/icons-material';
-
-interface BudgetInfo {
-    monthlyLimit: number;
-    currentExpense: number;
-    remaining: number;
-}
+import type {BudgetInfo} from "../../../types";
 
 interface BudgetCardProps {
     budget: BudgetInfo;
