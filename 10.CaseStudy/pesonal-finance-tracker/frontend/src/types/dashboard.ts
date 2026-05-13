@@ -4,8 +4,15 @@ export interface SummaryStats {
 }
 
 export interface MonthlyStat {
-    [key: string]: string | number;
     month: string;
     income: number;
     expense: number;
+    limit?: number;
+}
+
+export interface CategoryStat {
+    id: number;
+    label: string;
+    color: string;
+    value: number;
 }

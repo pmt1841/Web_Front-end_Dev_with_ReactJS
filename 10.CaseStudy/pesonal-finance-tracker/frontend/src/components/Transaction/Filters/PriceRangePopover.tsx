@@ -20,11 +20,12 @@ interface PriceRangePopoverProps {
 }
 
 const PRICE_PRESETS: PricePreset[] = [
-    { label: 'Tất cả', min: "", max: "" },
-    { label: '0 - 1 triệu', min: "0", max: "1000000" },
-    { label: '1 - 10 triệu', min: "1000000", max: "10000000" },
-    { label: '10 - 50 triệu', min: "10000000", max: "50000000" },
-    { label: 'Trên 50 triệu', min: "50000000", max: "" },
+    {label: 'Tất cả', min: "", max: ""},
+    {label: '0 - 1 triệu', min: "0", max: "1000000"},
+    {label: '1 - 10 triệu', min: "1000000", max: "10000000"},
+    {label: '10 - 20 triệu', min: "10000000", max: "20000000"},
+    {label: '10 - 50 triệu', min: "10000000", max: "50000000"},
+    {label: 'Trên 50 triệu', min: "50000000", max: ""},
 ];
 
 const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
@@ -99,18 +100,18 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                 onClick={(e) => setPriceAnchorEl(e.currentTarget)}
                 placeholder="Tất cả"
                 slotProps={{
-                    input: { readOnly: true, sx: { cursor: 'pointer' } },
-                    htmlInput: { sx: { cursor: 'pointer', textOverflow: 'ellipsis' } }
+                    input: {readOnly: true, sx: {cursor: 'pointer'}},
+                    htmlInput: {sx: {cursor: 'pointer', textOverflow: 'ellipsis'}}
                 }}
             />
             <Popover
                 open={Boolean(priceAnchorEl)}
                 anchorEl={priceAnchorEl}
                 onClose={() => setPriceAnchorEl(null)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
             >
-                <Box sx={{ p: 3, width: 280 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                <Box sx={{p: 3, width: 280}}>
+                    <Typography variant="subtitle2" sx={{mb: 1, fontWeight: 'bold'}}>
                         Chọn nhanh khoảng giá
                     </Typography>
 
@@ -120,24 +121,31 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                             const selected = PRICE_PRESETS.find(p => p.label === e.target.value);
                             if (selected) handlePresetChange(selected);
                         }}
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            columnGap: 2,
+                            rowGap: 1,
+                        }}
                     >
                         {PRICE_PRESETS.map((preset) => (
                             <FormControlLabel
                                 key={preset.label}
                                 value={preset.label}
-                                control={<Radio size="small" color="success" />}
+                                control={<Radio size="small" color="success"/>}
                                 label={<Typography variant="body2">{preset.label}</Typography>}
+                                sx={{marginRight: 0}} // bỏ margin mặc định để căn đều
                             />
                         ))}
                     </RadioGroup>
 
-                    <Divider sx={{ my: 2 }} />
+                    <Divider sx={{my: 2}}/>
 
-                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    <Typography variant="subtitle2" sx={{mb: 2, fontWeight: 'bold'}}>
                         Hoặc nhập thủ công
                     </Typography>
 
-                    <Stack spacing={2}>
+                    <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                         <TextField
                             label="Tối thiểu"
                             size="small"
@@ -147,7 +155,9 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                                 setTempMin(e.target.value);
                                 setTempPreset('Tùy chỉnh');
                             }}
+                            sx={{flex: 1}}
                         />
+                        <Typography variant="body1" sx={{fontWeight: 'bold'}}>-</Typography>
                         <TextField
                             label="Tối đa"
                             size="small"
@@ -157,25 +167,26 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                                 setTempMax(e.target.value);
                                 setTempPreset('Tùy chỉnh');
                             }}
+                            sx={{flex: 1}}
                         />
                     </Stack>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3}}>
                         <Button
                             onClick={handleReset}
                             variant="text"
                             color="error"
                             size="small"
-                            sx={{ textTransform: 'none' }}
+                            sx={{textTransform: 'none'}}
                         >
                             Xóa lọc
                         </Button>
 
-                        <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Box sx={{display: 'flex', gap: 1}}>
                             <Button
                                 size="small"
                                 onClick={() => setPriceAnchorEl(null)}
-                                sx={{ textTransform: 'none' }}
+                                sx={{textTransform: 'none'}}
                             >
                                 Hủy
                             </Button>
@@ -184,7 +195,7 @@ const PriceRangePopover: React.FC<PriceRangePopoverProps> = ({
                                 variant="contained"
                                 color="success"
                                 size="small"
-                                sx={{ textTransform: 'none' }}
+                                sx={{textTransform: 'none'}}
                             >
                                 Áp dụng
                             </Button>

@@ -3,16 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { Container, Grid, Box, Typography, Grow } from "@mui/material";
 import api from "../../services/api";
-import type { Transaction, PageResponse, SummaryStats, MonthlyStat, CategoryStat } from "../../types";
+import type { Transaction, PageResponse, SummaryStats, MonthlyStat, CategoryStat, BudgetInfo } from "../../types/";
 import { SummaryCard, BarChartSection, PieChartSection, RecentTransactionsList, BudgetCard, BudgetSettingModal } from '../Dashboard';
-
-const CHART_COLORS = ['#f44336', '#ff9800', '#2196f3', '#9c27b0', '#009688', '#795548'];
-
-interface BudgetInfo {
-    monthlyLimit: number;
-    currentExpense: number;
-    remaining: number;
-}
 
 const DashboardPage = () => {
     const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
@@ -40,9 +32,8 @@ const DashboardPage = () => {
             setSummary(summaryRes.data);
             setBarData(monthlyRes.data);
 
-            const formattedPieData = categoryRes.data.map((item, index) => ({
-                ...item,
-                color: CHART_COLORS[index % CHART_COLORS.length]
+            const formattedPieData = categoryRes.data.map((item) => ({
+                ...item
             }));
             setPieData(formattedPieData);
 

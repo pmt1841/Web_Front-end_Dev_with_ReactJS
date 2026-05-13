@@ -4,7 +4,9 @@ import com.codegym.backend.dto.category.CategoryStatDto;
 import com.codegym.backend.dto.transaction.MonthlyStatDto;
 import com.codegym.backend.dto.transaction.SummaryStatDto;
 import com.codegym.backend.dto.transaction.TransactionFilter;
+import com.codegym.backend.entity.budget.Budget;
 import com.codegym.backend.entity.transaction.Transaction;
+import com.codegym.backend.repository.BudgetRepository;
 import com.codegym.backend.repository.TransactionRepository;
 import com.codegym.backend.repository.specification.TransactionSpecifications;
 import com.codegym.backend.service.transaction.TransactionService;
@@ -17,12 +19,15 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
+    private final BudgetRepository budgetRepository;
 
     @Override
     public Page<Transaction> getAllTransactions(TransactionFilter filter, Pageable pageable) {
@@ -83,11 +88,12 @@ public class TransactionServiceImpl implements TransactionService {
         for (Object[] row : results) {
             Integer id = (Integer) row[0];
             String name = (String) row[1];
+            String color = (String) row[2];
 
-            Number sumAmount = (Number) row[2];
+            Number sumAmount = (Number) row[3];
             Long value = sumAmount.longValue();
 
-            categoryStats.add(new CategoryStatDto(id, name, value));
+            categoryStats.add(new CategoryStatDto(id, name, color, value));
         }
 
         return categoryStats;
@@ -97,14 +103,19 @@ public class TransactionServiceImpl implements TransactionService {
     public List<MonthlyStatDto> getMonthlyStats() {
         int currentYear = LocalDate.now().getYear();
         List<Object[]> results = transactionRepository.getMonthlyStats(currentYear);
+
+        Map<Integer, Long> budgetMap = budgetRepository.findByYear(currentYear).stream()
+                .collect(Collectors.toMap(Budget::getMonth, Budget::getAmount));
+
         List<MonthlyStatDto> monthlyStats = new ArrayList<>();
 
         for (Object[] row : results) {
             Integer monthNum = (Integer) row[0];
             Long income = (Long) row[1];
             Long expense = (Long) row[2];
+            Long limit = budgetMap.getOrDefault(monthNum, 0L);
 
-            monthlyStats.add(new MonthlyStatDto("T" + monthNum, income, expense));
+            monthlyStats.add(new MonthlyStatDto("T" + monthNum, income, expense, limit));
         }
 
         return monthlyStats;

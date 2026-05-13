@@ -42,10 +42,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     Long getTotalExpenseByMonth(@Param("month") int month, @Param("year") int year);
 
     // 3. Thống kê CHI theo DANH MỤC
-    @Query("SELECT c.id, c.name, ABS(SUM(t.amount)) " +
+    @Query("SELECT c.id, c.name, c.color, ABS(SUM(t.amount)) " +
             "FROM Transaction t JOIN t.category c " +
             "WHERE t.amount < 0 AND MONTH(t.date) = :month AND YEAR(t.date) = :year " +
-            "GROUP BY c.id, c.name")
+            "GROUP BY c.id, c.name, c.color")
     List<Object[]> getExpenseByCategory(@Param("month") int month, @Param("year") int year);
 
     // 4. Thống kê THU/CHI theo từng THÁNG

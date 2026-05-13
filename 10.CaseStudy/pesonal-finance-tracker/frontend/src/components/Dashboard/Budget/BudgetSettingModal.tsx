@@ -1,11 +1,11 @@
 // src/components/Dashboard/BudgetSettingModal.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Button, Box, Typography, CircularProgress, Stack, Alert
+    TextField, Button, Box, Typography, CircularProgress, Stack, Alert, Chip
 } from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
+import {Save as SaveIcon} from '@mui/icons-material';
 
 interface BudgetSettingModalProps {
     open: boolean;
@@ -16,11 +16,11 @@ interface BudgetSettingModalProps {
 }
 
 const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
-                                                                     open,
-                                                                     onClose,
-                                                                     currentLimit,
-                                                                     onSave
-                                                                 }) => {
+                                                                   open,
+                                                                   onClose,
+                                                                   currentLimit,
+                                                                   onSave
+                                                               }) => {
     const [limitInput, setLimitInput] = useState(currentLimit.toString());
     const [error, setError] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -36,6 +36,27 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
         setError("");
         setIsSaving(false);
         onClose();
+    };
+
+    // --- HÀM XỬ LÝ NHẬP NHANH ---
+    const handleQuickAppend = (zeros: string) => {
+        // Chỉ thêm số 0 khi người dùng đã nhập ít nhất 1 số hợp lệ (khác 0 và không rỗng)
+        if (!limitInput || limitInput === "0") {
+            setError("Vui lòng nhập số đầu tiên trước (ví dụ: 5)");
+            return;
+        }
+
+        // Nối thêm các số 0 vào sau giá trị hiện tại
+        const newValue = limitInput + zeros;
+
+        // Cảnh báo nhẹ nếu vượt quá 10 tỷ ngay lúc bấm nút
+        if (Number(newValue) > 10000000000) {
+            setError("Giới hạn không được vượt quá 10 tỷ VNĐ");
+            return;
+        }
+
+        setLimitInput(newValue);
+        setError("");
     };
 
     const validateInput = (): boolean => {
@@ -101,7 +122,7 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
             </DialogTitle>
 
             <DialogContent dividers>
-                <Stack spacing={2} sx={{ mt: 2 }}>
+                <Stack spacing={2} sx={{mt: 2}}>
                     {/* Hiển thị giới hạn hiện tại */}
                     <Box sx={{
                         p: 2,
@@ -109,10 +130,10 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
                         borderRadius: 1,
                         border: "1px solid #e0e0e0"
                     }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{fontWeight: 'bold'}}>
                             Giới hạn hiện tại
                         </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2e7d32", mt: 0.5 }}>
+                        <Typography variant="h6" sx={{fontWeight: "bold", color: "#2e7d32", mt: 0.5}}>
                             {formatCurrency(currentLimit)} VNĐ
                         </Typography>
                     </Box>
@@ -128,7 +149,7 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
                             setError("");
                         }}
                         slotProps={{
-                            htmlInput: { min: 0, step: 100000 }
+                            htmlInput: {min: 0, step: 100000}
                         }}
                         error={!!error}
                         helperText={error}
@@ -136,17 +157,40 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
                         autoFocus
                     />
 
+                    {/* --- CÁC NÚT NHẬP NHANH --- */}
+                    <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                        <Typography variant="caption" sx={{color: "text.secondary", mr: 1}}>
+                            Thêm nhanh:
+                        </Typography>
+                        <Chip
+                            label="+000 (Ngàn)"
+                            onClick={() => handleQuickAppend("000")}
+                            color="success"
+                            variant="outlined"
+                            disabled={isSaving || !limitInput || limitInput === "0"}
+                            sx={{cursor: 'pointer', '&:hover': {bgcolor: '#e8f5e9'}}}
+                        />
+                        <Chip
+                            label="+000.000 (Triệu)"
+                            onClick={() => handleQuickAppend("000000")}
+                            color="success"
+                            variant="outlined"
+                            disabled={isSaving || !limitInput || limitInput === "0"}
+                            sx={{cursor: 'pointer', '&:hover': {bgcolor: '#e8f5e9'}}}
+                        />
+                    </Stack>
+
                     {/* Helper text */}
-                    <Box sx={{ p: 1.5, bgcolor: "#e8f5e9", borderRadius: 1 }}>
-                        <Typography variant="caption" sx={{ color: "#2e7d32", fontWeight: 500 }}>
+                    <Box sx={{p: 1.5, bgcolor: "#e8f5e9", borderRadius: 1}}>
+                        <Typography variant="caption" sx={{color: "#2e7d32", fontWeight: 500}}>
                             💡 Mẹo: Nhập số tiền bạn muốn dành cho chi tiêu mỗi tháng.
-                            <br />
+                            <br/>
                         </Typography>
                     </Box>
 
                     {/* Error Alert */}
                     {error && (
-                        <Alert severity="error" sx={{ mb: 1 }}>
+                        <Alert severity="error" sx={{mb: 1}}>
                             {error}
                         </Alert>
                     )}
@@ -159,10 +203,10 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
                             borderRadius: 1,
                             border: "1px solid #bbdefb"
                         }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{fontWeight: 'bold'}}>
                                 Giới hạn sẽ được cập nhật thành
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#1976d2", mt: 0.5 }}>
+                            <Typography variant="body2" sx={{fontWeight: "bold", color: "#1976d2", mt: 0.5}}>
                                 {formatCurrency(Number(limitInput))} VNĐ
                             </Typography>
                         </Box>
@@ -170,26 +214,26 @@ const BudgetSettingModal: React.FC<BudgetSettingModalProps> = ({
                 </Stack>
             </DialogContent>
 
-            <DialogActions sx={{ p: 2, justifyContent: "flex-end", gap: 1 }}>
+            <DialogActions sx={{p: 2, justifyContent: "flex-end", gap: 1}}>
                 <Button
                     onClick={handleClose}
                     color="inherit"
                     variant="outlined"
                     disabled={isSaving}
-                    sx={{ width: 100 }}
+                    sx={{width: 100}}
                 >
                     Hủy
                 </Button>
                 <Button
                     onClick={handleSave}
                     variant="contained"
-                    startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                    startIcon={isSaving ? <CircularProgress size={20} color="inherit"/> : <SaveIcon/>}
                     disabled={isSaving}
                     sx={{
                         width: 140,
                         backgroundColor: "#2e7d32",
-                        "&:hover": { backgroundColor: "#1b5e20" },
-                        "&:disabled": { backgroundColor: "#bdbdbd" }
+                        "&:hover": {backgroundColor: "#1b5e20"},
+                        "&:disabled": {backgroundColor: "#bdbdbd"}
                     }}
                 >
                     {isSaving ? "Đang lưu..." : "Lưu cài đặt"}

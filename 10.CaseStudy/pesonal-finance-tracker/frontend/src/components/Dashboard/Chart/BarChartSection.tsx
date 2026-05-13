@@ -3,7 +3,7 @@
 import React from 'react';
 import {Paper, Typography, Grow} from '@mui/material';
 import {BarChart} from '@mui/x-charts/BarChart';
-import type {MonthlyStat} from '../../../types/dashboard';
+import type {MonthlyStat} from '../../../types';
 
 interface BarChartSectionProps {
     barData: MonthlyStat[];
@@ -12,7 +12,8 @@ interface BarChartSectionProps {
 const BarChartSection: React.FC<BarChartSectionProps> = ({barData}) => {
     const formattedBarData = barData.map(item => ({
         ...item,
-        expense: Math.abs(item.expense)
+        expense: Math.abs(item.expense),
+        limit: item.limit || 0,
     }));
 
     return (
@@ -29,6 +30,17 @@ const BarChartSection: React.FC<BarChartSectionProps> = ({barData}) => {
                             dataKey: 'income',
                             label: 'Thu nhập',
                             color: '#4caf50',
+                            barLabel: (item) => {
+                                const val = item.value ?? 0;
+                                if (val >= 1000000) return `${(val / 1000000).toFixed(1)}Tr`;
+                                if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+                                return val.toString();
+                            }
+                        },
+                        {
+                            dataKey: 'limit',
+                            label: 'Hạn mức',
+                            color: '#e0e0e0',
                             barLabel: (item) => {
                                 const val = item.value ?? 0;
                                 if (val >= 1000000) return `${(val / 1000000).toFixed(1)}Tr`;

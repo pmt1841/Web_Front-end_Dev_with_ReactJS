@@ -3,6 +3,7 @@ package com.codegym.backend.entity.transaction;
 import com.codegym.backend.entity.category.Category;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,20 +23,22 @@ public class Transaction {
 
     @NotBlank(message = "Tiêu đề không được để trống")
     @Size(max = 50, message = "Tiêu đề không được quá 50 ký tự")
-    @Column(columnDefinition = "VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")
+    @Column(columnDefinition = "VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin", nullable = false)
     private String title;
 
     @NotNull(message = "Số tiền không được để trống")
+    @Column(nullable = false)
     private Long amount;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @Valid
     @NotNull(message = "Danh mục không được để trống")
-    @Size(max = 50, message = "Tên danh mục không được quá 50 ký tự")
     private Category category;
 
     @NotNull(message = "Ngày tháng không được để trống")
     @PastOrPresent(message = "Ngày giao dịch không được vượt quá thời gian hiện tại")
+    @Column(nullable = false)
     private LocalDate date;
 
     @Size(max = 255, message = "Ghi chú không được quá 255 ký tự")
